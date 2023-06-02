@@ -10,8 +10,11 @@ interface ButtonProps {
 
 const MainNavigationButton = ({ label, icon, href }: ButtonProps) => {
   return (
-    <Link className="grid place-items-center gap-4" href={href}>
-      <button className="aspect-square w-96 border-8 border-black">
+    <Link
+      className="grid w-full basis-full place-items-center gap-4"
+      href={href}
+    >
+      <button className="aspect-square w-full border-8 border-black">
         <FontAwesomeIcon icon={icon} size="10x" />
       </button>
       <h2 className="text-4xl">{label}</h2>

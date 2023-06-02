@@ -6,6 +6,7 @@ import {
 import MainNavigationButton from "@movies/components/MainNavigationButton";
 import { type NextPage } from "next";
 import Head from "next/head";
+import "@fortawesome/fontawesome-svg-core/styles.css";
 
 const Home: NextPage = () => {
   return (
@@ -18,9 +19,9 @@ const Home: NextPage = () => {
         />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className="flex min-h-screen flex-col justify-center gap-40 bg-gradient-to-bl from-[#F53803] to-[#F5D020]">
+      <main className="min-h-screen bg-gradient-to-bl from-[#b0e5d0] to-[#5ccaee69] px-4 text-black">
         <h1 className="text-center text-6xl">Movie Annotations</h1>
-        <div className="grid w-full grid-cols-3 place-items-stretch">
+        <div className="flex flex-wrap justify-center gap-10">
           <MainNavigationButton label="Create Room" icon={faPlus} href="" />
           <MainNavigationButton
             label="Join Room"
