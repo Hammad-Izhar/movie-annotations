@@ -19,9 +19,10 @@ const Home: NextPage = () => {
         />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className="min-h-screen bg-gradient-to-bl from-[#b0e5d0] to-[#5ccaee69] px-4 text-black">
-        <h1 className="text-center text-6xl">Movie Annotations</h1>
-        <div className="flex flex-wrap justify-center gap-10">
+      <main className="min-h-screen bg-gradient-to-bl from-[#b0e5d0] to-[#5ccaee69] px-4 py-10 text-black">
+        <h1 className="pb-10 text-center text-6xl">Movie Annotations</h1>
+
+        <div className="flex flex-col flex-wrap items-center justify-center gap-10 lg:flex-row">
           <MainNavigationButton label="Create Room" icon={faPlus} href="" />
           <MainNavigationButton
             label="Join Room"

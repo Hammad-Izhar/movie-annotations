@@ -11,7 +11,7 @@ interface ButtonProps {
 const MainNavigationButton = ({ label, icon, href }: ButtonProps) => {
   return (
     <Link
-      className="grid w-full basis-full place-items-center gap-4"
+      className="grid w-full max-w-xs basis-1/4 place-items-center gap-4"
       href={href}
     >
       <button className="aspect-square w-full border-8 border-black">

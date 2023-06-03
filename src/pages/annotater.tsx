@@ -17,7 +17,7 @@ const Annotater: NextPage = () => {
         />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className="min-h-screen bg-gradient-to-bl from-[#b0e5d0] to-[#5ccaee69] px-4 text-black">
+      <main className="flex min-h-screen flex-grow flex-col bg-gradient-to-bl from-[#b0e5d0] to-[#5ccaee69] px-4 text-black">
         <div className="flex justify-between py-4 text-lg">
           <a className="flex items-baseline justify-center gap-2">
             <FontAwesomeIcon
@@ -28,23 +28,25 @@ const Annotater: NextPage = () => {
           </a>
           <span>Time: 1:00:00 / 2:00:00</span>
         </div>
-        <div className="grid gap-4 text-xl">
-          <span>
-            <b>Target Emotion:</b> Happiness
-          </span>
-          <span>
-            <b>Character:</b> The Sultan
-          </span>
-          <div className="grid place-items-center">
-            <Image
-              className="place-items-center"
-              src="/profile.png"
-              alt="character"
-              width={300}
-              height={300}
-            />
+        <div className="flex h-full flex-grow items-center justify-center">
+          <div className="grid gap-4 text-xl">
+            <span>
+              <b>Target Emotion:</b> Happiness
+            </span>
+            <span>
+              <b>Character:</b> The Sultan
+            </span>
+            <div className="grid place-items-center">
+              <Image
+                className="place-items-center"
+                src="/profile.png"
+                alt="character"
+                width={300}
+                height={300}
+              />
+            </div>
+            <AnnotationInput />
           </div>
-          <AnnotationInput />
         </div>
       </main>
     </>
