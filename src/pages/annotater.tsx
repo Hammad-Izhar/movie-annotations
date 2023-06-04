@@ -19,7 +19,7 @@ const Annotater: NextPage = () => {
       </Head>
       <main className="flex min-h-screen flex-grow flex-col bg-gradient-to-bl from-[#b0e5d0] to-[#5ccaee69] px-4 text-black">
         <div className="flex justify-between py-4 text-lg">
-          <a className="flex items-baseline justify-center gap-2">
+          <a className="flex items-baseline justify-center gap-2" href="">
             <FontAwesomeIcon
               icon={faPersonWalkingArrowRight}
               flip="horizontal"
