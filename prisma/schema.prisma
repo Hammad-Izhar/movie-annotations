@@ -2,12 +2,12 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-    provider = "prisma-client-js"
+    provider        = "prisma-client-js"
     previewFeatures = ["jsonProtocol"]
 }
 
 datasource db {
-    provider = "sqlite"
+    provider = "mongodb"
     // NOTE: When using mysql or sqlserver, uncomment the @db.Text annotations in model Account below
     // Further reading:
     // https://next-auth.js.org/adapters/prisma#create-the-prisma-schema
@@ -15,53 +15,51 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
-model Example {
-    id        String   @id @default(cuid())
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-}
-
-// Necessary for Next auth
-model Account {
-    id                String  @id @default(cuid())
-    userId            String
-    type              String
-    provider          String
-    providerAccountId String
-    refresh_token     String? // @db.Text
-    access_token      String? // @db.Text
-    expires_at        Int?
-    token_type        String?
-    scope             String?
-    id_token          String? // @db.Text
-    session_state     String?
-    user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-    @@unique([provider, providerAccountId])
-}
-
-model Session {
-    id           String   @id @default(cuid())
-    sessionToken String   @unique
-    userId       String
-    expires      DateTime
-    user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
 model User {
-    id            String    @id @default(cuid())
-    name          String?
-    email         String?   @unique
-    emailVerified DateTime?
-    image         String?
-    accounts      Account[]
-    sessions      Session[]
+    id         String      @id @default(auto()) @map("_id") @db.ObjectId
+    name       String
+    isAdmin    Boolean     @default(false)
+    Annotation Annotation?
+    Room       Room?
 }
 
-model VerificationToken {
-    identifier String
-    token      String   @unique
-    expires    DateTime
+model Movie {
+    id                   String      @id @default(auto()) @map("_id") @db.ObjectId
+    name                 String
+    url                  String
+    numFrames            Int
+    characters           String[]
+    isPartiallyAnnotated Boolean
+    isFullyAnnotated     Boolean
+    Annotation           Annotation?
+    Room                 Room?
+}
 
-    @@unique([identifier, token])
+model Annotation {
+    id          String  @id @default(auto()) @map("_id") @db.ObjectId
+    movie       Movie   @relation(fields: [movieId], references: [id])
+    movieId     String  @unique @db.ObjectId
+    annotator   User    @relation(fields: [annotatorId], references: [id])
+    annotatorId String  @unique @db.ObjectId
+    frameNumber Int
+    character   String // There might be a better way to type this!!!
+    emotion     Emotion // There might be a better way to type this!!!
+    valence     Int // There might be a better way to type this!!!
+}
+
+model Room {
+    id      String @id @map("_id")
+    host    User   @relation(fields: [hostId], references: [id])
+    hostId  String @unique @db.ObjectId
+    movie   Movie  @relation(fields: [movieId], references: [id])
+    movieId String @unique @db.ObjectId
+}
+
+enum Emotion {
+    HAPPINESS
+    SADNESS
+    ANGER
+    FEAR
+    SURPRISE
+    DISGUST
 }
