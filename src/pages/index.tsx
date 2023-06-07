@@ -7,8 +7,25 @@ import MainNavigationButton from "@movies/components/MainNavigationButton";
 import { type NextPage } from "next";
 import Head from "next/head";
 import "@fortawesome/fontawesome-svg-core/styles.css";
+import { useEffect } from "react";
+import Ably from "ably";
 
 const Home: NextPage = () => {
+  let ably: Ably.Realtime;
+
+  useEffect(() => {
+    const fetchToken = async () => {
+      try {
+        const response = await fetch("/api/ablyToken");
+        const { token } = (await response.json()) as { token: string };
+
+        ably = new Ably.Realtime({ token });
+      } catch (err) {
+        console.error(err);
+      }
+    };
+  });
+
   return (
     <>
       <Head>
