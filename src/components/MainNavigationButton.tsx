@@ -1,24 +1,41 @@
 import { type IconDefinition } from "@fortawesome/fontawesome-svg-core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Link from "next/link";
+import { type PropsWithChildren, useRef } from "react";
 
 interface ButtonProps {
   icon: IconDefinition;
-  href: string;
   label?: string;
 }
 
-const MainNavigationButton = ({ label, icon, href }: ButtonProps) => {
+const MainNavigationButton = ({
+  label,
+  icon,
+  children,
+}: PropsWithChildren<ButtonProps>) => {
+  const modalRef = useRef<HTMLDialogElement>(null);
+
   return (
-    <Link
-      className="grid w-full max-w-xs basis-1/4 place-items-center gap-4"
-      href={href}
-    >
-      <button className="aspect-square w-full border-8 border-black">
-        <FontAwesomeIcon icon={icon} size="10x" />
+    <>
+      <button
+        className="grid w-full max-w-xs basis-1/4 place-items-center gap-4"
+        onClick={() => {
+          modalRef.current?.showModal();
+        }}
+      >
+        <div className="grid aspect-square w-full place-items-center border-8 border-black">
+          <FontAwesomeIcon icon={icon} size="10x" />
+        </div>
+        <h2 className="text-4xl">{label}</h2>
       </button>
-      <h2 className="text-4xl">{label}</h2>
-    </Link>
+      <dialog ref={modalRef} className="modal">
+        <form method="dialog" className="modal-box">
+          {children}
+        </form>
+        <form method="dialog" className="modal-backdrop">
+          <button>close</button>
+        </form>
+      </dialog>
+    </>
   );
 };
 

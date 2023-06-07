@@ -23,13 +23,36 @@ const Home: NextPage = () => {
         <h1 className="pb-10 text-center text-6xl">Movie Annotations</h1>
 
         <div className="flex flex-col flex-wrap items-center justify-center gap-10 lg:flex-row">
-          <MainNavigationButton label="Create Room" icon={faPlus} href="" />
-          <MainNavigationButton
-            label="Join Room"
-            icon={faPeopleGroup}
-            href=""
-          />
-          <MainNavigationButton label="View Data" icon={faGears} href="" />
+          <MainNavigationButton label="Create Room" icon={faPlus}>
+            <div className="grid gap-2">
+              <h3 className="text-lg font-bold">Host a Movie!</h3>
+              <p>Select a movie from the dropdown and press submit.</p>
+              <select>
+                <option selected disabled>
+                  Select a movie!
+                </option>
+                <option>iRobot</option>
+                <option>House</option>
+              </select>
+              <button className="btn-accent btn my-4 capitalize">Submit</button>
+            </div>
+          </MainNavigationButton>
+
+          <MainNavigationButton label="Join Room" icon={faPeopleGroup}>
+            <div className="grid gap-2">
+              <h3 className="text-lg font-bold">Join a Room!</h3>
+              <p>Enter the code of the room you want to join</p>
+              <input className="p-2 font-semibold" type="text" />
+              <button
+                className="btn-accent btn my-4 capitalize"
+                onClick={() => console.log("submit")}
+              >
+                Submit
+              </button>
+            </div>
+          </MainNavigationButton>
+
+          <MainNavigationButton label="View Data" icon={faGears} />
         </div>
       </main>
     </>
