@@ -1,33 +1,102 @@
-<<<<<<< HEAD
-# movie-annotations
-Movie Annotation Web App for the Asaad Lab
-=======
-# Create T3 App
+# Movie Annotator
 
-This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
+A Next.js webapp used to annotate the emotion of characters synchronously
 
-## What's next? How do I make an app with this?
+## Requirements
 
-We try to keep this project as simple as possible, so you can start with just the scaffolding we set up for you, and add additional things later when they become necessary.
+This is a vanilla Next.js app bootstrapped with create-t3-app. To install the dependencies and run the app locally:
 
-If you are not familiar with the different technologies used in this project, please refer to the respective docs. If you still are in the wind, please join our [Discord](https://t3.gg/discord) and ask for help.
+```zsh
+npm install
+npm run dev
+```
 
-- [Next.js](https://nextjs.org)
-- [NextAuth.js](https://next-auth.js.org)
-- [Prisma](https://prisma.io)
-- [Tailwind CSS](https://tailwindcss.com)
-- [tRPC](https://trpc.io)
+**Note:** You may need to provide environment variables by creating a `.env` file from the `.env.example` file in the root directory. Be sure not to commit the `.env` file to version control (i.e. be sure its in `.gitignore`)!
 
-## Learn More
+- Google oAuth 2.0 (via **NextAuth**) is used for authentication
+- All data is saved to a **MongoDB** collection using **Prisma** as an ORM
+- **tRPC** is used to provide a type-safe interface between the MongoDB database and the client-side frontend
+- **Ably** is used to provide WebSocket functionality (since Vercel doesn't support hosting a WebSocket server on its serverless functions 😦)
 
-To learn more about the [T3 Stack](https://create.t3.gg/), take a look at the following resources:
+## Notes
 
-- [Documentation](https://create.t3.gg/)
-- [Learn the T3 Stack](https://create.t3.gg/en/faq#what-learning-resources-are-currently-available) — Check out these awesome tutorials
+### Schema
 
-You can check out the [create-t3-app GitHub repository](https://github.com/t3-oss/create-t3-app) — your feedback and contributions are welcome!
+```
+User {
+    id: uuid,
+    name: string,
+    isAdmin: boolean
+}
 
-## How do I deploy this?
+Movie {
+    id: uuid,
+    name: string,
+    url: string,
+    numFrames: numbers OR 1M total transactions per month
 
-Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), [Netlify](https://create.t3.gg/en/deployment/netlify) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
->>>>>>> 9af2d7f (scaffold application)
+
+    characters: string[]
+    emotions: string[]
+    isPartiallyAnnotated: boolean,
+    isFullyAnnotated: boolean,
+}
+
+Annotation {
+    id: uuid
+    movieId: @relation Movie.id
+    annotatorId: @relation User.id
+    frameNumber: number
+    character: string,
+    emotion: string,
+    valence: number
+}
+
+Room {
+    id: string,                    // think: grass-melon-beaver
+    host: @relation User.id
+    movie: @relation Movie.id
+}
+```
+
+### Actions
+
+**_Create Room_**: fired from the "Create Room" button on the landing page
+
+1. Query the database for the list of all "available" movies
+   - Might want to filter out the fully annotated movies?
+2. User selects from a dropdown, the move they want to host
+3. Generate a room code at random (ex. `grass-melon-beaver`)
+4. Push a new `Room` document to the database
+5. Redirect the host to `/{roomCode}/host`
+6. Connect the host to the Ably channel `{roomCode}`
+
+**_Join Room_**: fired from the "Join Room" button on the landing page
+
+1. User inputs a room code
+2. The database is queried to see if the room exists
+   - if the room doesn't exist then an error toast will pop up
+3. The user will be redirected to `/{roomCode}/annotator`
+4. The user will be assigned a character and an emotion
+5. Connect the annotator to the Ably channel `{roomCode}`
+
+**_Leave Room_**: fired from the "Leave Room" button on the annotator page
+
+1. The user will be unsubscribed from the `{roomCode}` channel
+2. The user will redirect to `/`
+
+**_Close Room_**: fired from the "Close Room" button on the host page
+
+1. The WebSocket channel will be destroyed
+2. The Room is removed from the db
+3. The user will redirect to `/`
+
+**Note:** Unsure how directly navigating to these pages will affect anything or what will happen if the page is reloaded. Also need to support users joining late (I think users leaving early are fine with this structure)
+
+### Websocket Events
+
+**_Pause_**: The host broadcasts the pause event when the video player is paused
+
+**_Play_**: The host broadcasts the play event when the video player begins playing
+
+**_Frame_**: The host broadcasts the frame event (with frame number) on a new frame
