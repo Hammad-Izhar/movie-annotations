@@ -1,35 +1,20 @@
-import { env } from "@movies/env.mjs";
 import Ably from "ably";
 import type { NextApiRequest, NextApiResponse } from "next";
 
-interface TokenResponse {
-  token: Ably.Types.TokenDetails;
-}
-
-export default function ablyTokenHandler(
+export default async function ablyTokenHandler(
   req: NextApiRequest,
-  res: NextApiResponse<TokenResponse | { error: string }>
+  res: NextApiResponse
 ) {
-  const ablyRestAPI = new Ably.Rest({ key: env.ABLY_ROOT_KEY });
-  ablyRestAPI.auth.requestToken(
-    {
-      //* TODO: client details *//
-    },
-    null,
-    (err, token) => {
-      if (err) {
-        console.error(`Error with token request: ${err.message}`);
-        res.status(err.code).json({ error: "Error with token request" });
-        return;
-      }
+  const ably = new Ably.Realtime.Promise({
+    key: "xVLyHw.msYIGg:HZC0-BEBxYIi2N52CwS5lEflZGjTxn3DB3gzZdn1kBQ",
+  });
 
-      if (token === undefined) {
-        console.error(`Failed to receive a token`);
-        res.status(500).json({ error: "Failed to receive a token" });
-        return;
-      }
-
-      res.status(200).json({ token });
-    }
-  );
+  try {
+    const token = await ably.auth.createTokenRequest({
+      clientId: req.query.clientId as string,
+    });
+    res.status(200).json(token);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to generate Ably token" });
+  }
 }

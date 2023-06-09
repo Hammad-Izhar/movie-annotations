@@ -7,8 +7,19 @@ import MainNavigationButton from "@movies/components/MainNavigationButton";
 import { type NextPage } from "next";
 import Head from "next/head";
 import "@fortawesome/fontawesome-svg-core/styles.css";
+import { useEffect } from "react";
+import Ably from "ably";
 
 const Home: NextPage = () => {
+  useEffect(() => {
+    const ably = new Ably.Realtime({
+      clientId: "Hammad",
+      authUrl: "/api/ablyToken",
+    });
+
+    console.log(ably);
+  }, []);
+
   return (
     <>
       <Head>
@@ -28,9 +39,7 @@ const Home: NextPage = () => {
               <h3 className="text-lg font-bold">Host a Movie!</h3>
               <p>Select a movie from the dropdown and press submit.</p>
               <select>
-                <option selected disabled>
-                  Select a movie!
-                </option>
+                <option disabled>Select a Movie!</option>
                 <option>iRobot</option>
                 <option>House</option>
               </select>
