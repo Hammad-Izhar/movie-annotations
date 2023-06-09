@@ -1,3 +1,4 @@
+import "@fortawesome/fontawesome-svg-core/styles.css";
 import {
   faGears,
   faPeopleGroup,
@@ -6,20 +7,8 @@ import {
 import MainNavigationButton from "@movies/components/MainNavigationButton";
 import { type NextPage } from "next";
 import Head from "next/head";
-import "@fortawesome/fontawesome-svg-core/styles.css";
-import { useEffect } from "react";
-import Ably from "ably";
 
 const Home: NextPage = () => {
-  useEffect(() => {
-    const ably = new Ably.Realtime({
-      clientId: "Hammad",
-      authUrl: "/api/ablyToken",
-    });
-
-    console.log(ably);
-  }, []);
-
   return (
     <>
       <Head>

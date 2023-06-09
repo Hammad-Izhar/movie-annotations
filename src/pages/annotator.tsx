@@ -1,10 +1,10 @@
+import "@fortawesome/fontawesome-svg-core/styles.css";
 import { faPersonWalkingArrowRight } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import AnnotationInput from "@movies/components/AnnotationInput";
 import { type NextPage } from "next";
 import Head from "next/head";
-import "@fortawesome/fontawesome-svg-core/styles.css";
 import Image from "next/image";
-import AnnotationInput from "@movies/components/AnnotationInput";
 
 const Annotater: NextPage = () => {
   return (

@@ -1,5 +1,5 @@
-import { createTRPCRouter } from "@movies/server/api/trpc";
 import { exampleRouter } from "@movies/server/api/routers/example";
+import { createTRPCRouter } from "@movies/server/api/trpc";
 
 /**
  * This is the primary router for your server.
