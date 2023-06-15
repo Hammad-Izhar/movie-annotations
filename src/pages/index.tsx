@@ -7,8 +7,13 @@ import {
 import MainNavigationButton from "@movies/components/MainNavigationButton";
 import { type NextPage } from "next";
 import Head from "next/head";
+import { useRouter } from "next/router";
+import { useRef } from "react";
 
 const Home: NextPage = () => {
+  const router = useRouter();
+  const selectRef = useRef<HTMLSelectElement>(null);
+
   return (
     <>
       <Head>
@@ -27,12 +32,25 @@ const Home: NextPage = () => {
             <div className="grid gap-2">
               <h3 className="text-lg font-bold">Host a Movie!</h3>
               <p>Select a movie from the dropdown and press submit.</p>
-              <select>
-                <option disabled>Select a Movie!</option>
+              <select ref={selectRef}>
                 <option>iRobot</option>
                 <option>House</option>
               </select>
-              <button className="btn-accent btn my-4 capitalize">Submit</button>
+              <button
+                className="btn-accent btn my-4 capitalize"
+                onClick={() => {
+                  const query = { key: selectRef.current?.value };
+
+                  router
+                    .push({
+                      pathname: "/host",
+                      query,
+                    })
+                    .catch((err) => console.error(err));
+                }}
+              >
+                Submit
+              </button>
             </div>
           </MainNavigationButton>
 

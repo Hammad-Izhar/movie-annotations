@@ -6,7 +6,7 @@ export default async function ablyTokenHandler(
   res: NextApiResponse
 ) {
   const ably = new Ably.Realtime.Promise({
-    key: "xVLyHw.msYIGg:HZC0-BEBxYIi2N52CwS5lEflZGjTxn3DB3gzZdn1kBQ",
+    key: "xVLyHw.Q2oB1g:pqJ1m2wouMH04a5fSvzvlSLR0DUhG78Z7Vz0WjuaDXY",
   });
 
   try {
