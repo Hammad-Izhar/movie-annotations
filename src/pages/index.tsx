@@ -17,7 +17,7 @@ const Home: NextPage = () => {
   return (
     <>
       <Head>
-        <title>Movie Annotater</title>
+        <title>Movie Annotator</title>
         <meta
           name="description"
           content="Movie Annotation Software for Asaad Lab"

@@ -1,11 +1,13 @@
+import "@fortawesome/fontawesome-svg-core/styles.css";
+import { type NextPage } from "next";
+import { useRouter } from "next/router";
+import { useEffect, useRef, useState } from "react";
 import { faPersonWalkingArrowRight } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Ably from "ably/promises";
-import { type NextPage } from "next";
 import dynamic from "next/dynamic";
 import Head from "next/head";
-import { useRouter } from "next/router";
-import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 
 const ReactPlayer = dynamic(() => import("react-player"), { ssr: false });
 
@@ -64,7 +66,7 @@ const HostPage: NextPage = () => {
   return (
     <>
       <Head>
-        <title>Movie Annotater</title>
+        <title>Movie Annotator</title>
         <meta
           name="description"
           content="Movie Annotation Software for Asaad Lab"
@@ -73,13 +75,13 @@ const HostPage: NextPage = () => {
       </Head>
       <main className="min-h-screen bg-gradient-to-bl from-[#b0e5d0] to-[#5ccaee69] px-4 text-black">
         <div className="flex justify-between py-4 text-lg">
-          <a className="flex items-baseline justify-center gap-2" href="">
+          <Link href="/" className="flex items-baseline justify-center gap-2">
             <FontAwesomeIcon
               icon={faPersonWalkingArrowRight}
               flip="horizontal"
             />
             Leave
-          </a>
+          </Link>
           <span className="font-bold">{roomCode}</span>
           <span>Num Annotators: {annotators.size}</span>
         </div>

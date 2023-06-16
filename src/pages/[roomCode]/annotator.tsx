@@ -1,16 +1,16 @@
 import "@fortawesome/fontawesome-svg-core/styles.css";
+import { type NextPage } from "next";
 import { faPersonWalkingArrowRight } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useRouter } from "next/router";
+import { useEffect } from "react";
 import AnnotationInput from "@movies/components/AnnotationInput";
 import Ably from "ably/promises";
-import { type NextPage } from "next";
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/router";
-import { useEffect } from "react";
 
-const Annotater: NextPage = () => {
+const Annotator: NextPage = () => {
   const router = useRouter();
   const roomCode = router.query.roomCode;
 
@@ -44,7 +44,7 @@ const Annotater: NextPage = () => {
   return (
     <>
       <Head>
-        <title>Movie Annotater</title>
+        <title>Movie Annotator</title>
         <meta
           name="description"
           content="Movie Annotation Software for Asaad Lab"
@@ -87,4 +87,4 @@ const Annotater: NextPage = () => {
   );
 };
 
-export default Annotater;
+export default Annotator;
