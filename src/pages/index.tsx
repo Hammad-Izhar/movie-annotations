@@ -6,13 +6,34 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import MainNavigationButton from "@movies/components/MainNavigationButton";
 import { type NextPage } from "next";
+import { signIn, signOut, useSession } from "next-auth/react";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 
 const Home: NextPage = () => {
   const router = useRouter();
   const selectRef = useRef<HTMLSelectElement>(null);
+  const { data: session } = useSession();
+
+  useEffect(() => {
+    console.log(session);
+  }, [session]);
+
+  if (session) {
+    return (
+      <>
+        Signed in as {session.user.email} <br />
+        <button onClick={() => void signOut()}>Sign out</button>
+      </>
+    );
+  }
+  return (
+    <>
+      Not signed in <br />
+      <button onClick={() => void signIn()}>Sign in</button>
+    </>
+  );
 
   return (
     <>

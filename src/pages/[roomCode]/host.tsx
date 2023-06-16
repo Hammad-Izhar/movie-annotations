@@ -119,4 +119,4 @@ export default HostPage;
 // * Assign annotators to a character
 // * Manage playable blocks?
 // * Send frame to annotator
-// * Get Auth Working
+// * Get Auth Working <----- next biggest hurdle
