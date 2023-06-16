@@ -1,25 +1,24 @@
 import "@fortawesome/fontawesome-svg-core/styles.css";
-import { type NextPage } from "next";
-import { useRouter } from "next/router";
-import { useEffect, useRef, useState } from "react";
 import { faPersonWalkingArrowRight } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Ably from "ably/promises";
+import { type NextPage } from "next";
 import dynamic from "next/dynamic";
 import Head from "next/head";
 import Link from "next/link";
+import { useRouter } from "next/router";
+import React, { useEffect, useState } from "react";
 
-const ReactPlayer = dynamic(() => import("react-player"), { ssr: false });
+const VideoPlayer = dynamic(() => import("@movies/components/Video"), {
+  ssr: false,
+});
 
 const HostPage: NextPage = () => {
   const router = useRouter();
   const roomCode = router.query.roomCode;
 
   const [annotators, setAnnotators] = useState(new Set<string>());
-
-  const videoRef = useRef<typeof ReactPlayer>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isFullscreen, setIsFullscreen] = useState(false);
 
   useEffect(() => {
     if (typeof roomCode != "string") {
@@ -58,6 +57,7 @@ const HostPage: NextPage = () => {
     };
 
     window.addEventListener("beforeunload", cleanup);
+
     return () => {
       window.removeEventListener("beforeunload", cleanup);
     };
@@ -88,13 +88,7 @@ const HostPage: NextPage = () => {
 
         <div className="flex">
           <div className="basis-5/6 grid place-items-center gap-4">
-            <ReactPlayer
-              url="https://www.youtube.com/watch?v=EZ1yCdoybSw"
-              ref={videoRef}
-              controls={false}
-              playing={isPlaying}
-              playbackRate={0.5}
-            />
+            <VideoPlayer />
             <div className="flex gap-4">
               <button
                 className="btn btn-primary"
