@@ -4,7 +4,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import AnnotationInput from "@movies/components/AnnotationInput";
 import Ably from "ably/promises";
 import { type NextPage } from "next";
-import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -42,7 +41,7 @@ const Annotator: NextPage = () => {
   }, [roomCode, router.events]);
 
   return (
-    <main className="flex min-h-screen flex-grow flex-col bg-gradient-to-bl from-[#b0e5d0] to-[#5ccaee69] px-4 text-black">
+    <main className="flex">
       <div className="flex justify-between py-4 text-lg">
         <Link href="/" className="flex items-baseline justify-center gap-2">
           <FontAwesomeIcon icon={faPersonWalkingArrowRight} flip="horizontal" />

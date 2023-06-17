@@ -9,7 +9,6 @@ import { api } from "@movies/utils/api";
 import generateRoomCode from "@movies/utils/generateRoomCode";
 import { type NextPage } from "next";
 import { signIn, signOut, useSession } from "next-auth/react";
-import Head from "next/head";
 import { useRouter } from "next/router";
 import { useRef } from "react";
 
@@ -37,7 +36,7 @@ const Home: NextPage = () => {
 
   if (!session) {
     return (
-      <main className="min-h-screen bg-gradient-to-bl from-[#b0e5d0] to-[#5ccaee69] px-4 py-10 text-black">
+      <main>
         <h1 className="pb-10 text-center text-6xl">Movie Annotations</h1>
 
         <div className="h-full flex justify-center items-center">
@@ -53,7 +52,7 @@ const Home: NextPage = () => {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-bl from-[#b0e5d0] to-[#5ccaee69] px-4 py-10 text-black">
+    <main>
       <h1 className="pb-10 text-center text-6xl">Movie Annotations</h1>
 
       <div className="flex flex-col flex-wrap items-center justify-center gap-10 lg:flex-row">

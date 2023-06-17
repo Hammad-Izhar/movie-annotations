@@ -5,7 +5,6 @@ import Ably from "ably/promises";
 import { type NextPage } from "next";
 import { useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
-import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
@@ -71,7 +70,7 @@ const HostPage: NextPage = () => {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-bl from-[#b0e5d0] to-[#5ccaee69] px-4 text-black">
+    <main>
       <div className="flex justify-between py-4 text-lg">
         <Link href="/" className="flex items-baseline justify-center gap-2">
           <FontAwesomeIcon icon={faPersonWalkingArrowRight} flip="horizontal" />
