@@ -3,6 +3,7 @@ import { faPersonWalkingArrowRight } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Ably from "ably/promises";
 import { type NextPage } from "next";
+import { useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
 import Head from "next/head";
 import Link from "next/link";
@@ -16,6 +17,8 @@ const VideoPlayer = dynamic(() => import("@movies/components/Video"), {
 const HostPage: NextPage = () => {
   const router = useRouter();
   const roomCode = router.query.roomCode;
+
+  const { data: session } = useSession();
 
   const [annotators, setAnnotators] = useState(new Set<string>());
   const [isPlaying, setIsPlaying] = useState(false);
@@ -63,48 +66,39 @@ const HostPage: NextPage = () => {
     };
   }, [roomCode]);
 
-  return (
-    <>
-      <Head>
-        <title>Movie Annotator</title>
-        <meta
-          name="description"
-          content="Movie Annotation Software for Asaad Lab"
-        />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-      <main className="min-h-screen bg-gradient-to-bl from-[#b0e5d0] to-[#5ccaee69] px-4 text-black">
-        <div className="flex justify-between py-4 text-lg">
-          <Link href="/" className="flex items-baseline justify-center gap-2">
-            <FontAwesomeIcon
-              icon={faPersonWalkingArrowRight}
-              flip="horizontal"
-            />
-            Leave
-          </Link>
-          <span className="font-bold">{roomCode}</span>
-          <span>Num Annotators: {annotators.size}</span>
-        </div>
+  if (!session) {
+    return <>Not Logged In</>;
+  }
 
-        <div className="flex">
-          <div className="basis-5/6 grid place-items-center gap-4">
-            <VideoPlayer />
-            <div className="flex gap-4">
-              <button
-                className="btn btn-primary"
-                onClick={() => setIsPlaying((val) => !val)}
-              >
-                {isPlaying ? "Pause" : "Play"}
-              </button>
-            </div>
-          </div>
-          <div className="basis-1/6">
-            <h2 className="text-center font-bold">Annotators</h2>
-            <ul></ul>
+  return (
+    <main className="min-h-screen bg-gradient-to-bl from-[#b0e5d0] to-[#5ccaee69] px-4 text-black">
+      <div className="flex justify-between py-4 text-lg">
+        <Link href="/" className="flex items-baseline justify-center gap-2">
+          <FontAwesomeIcon icon={faPersonWalkingArrowRight} flip="horizontal" />
+          Leave
+        </Link>
+        <span className="font-bold">{roomCode}</span>
+        <span>Num Annotators: {annotators.size}</span>
+      </div>
+
+      <div className="flex">
+        <div className="basis-5/6 grid place-items-center gap-4">
+          <VideoPlayer />
+          <div className="flex gap-4">
+            <button
+              className="btn btn-primary"
+              onClick={() => setIsPlaying((val) => !val)}
+            >
+              {isPlaying ? "Pause" : "Play"}
+            </button>
           </div>
         </div>
-      </main>
-    </>
+        <div className="basis-1/6">
+          <h2 className="text-center font-bold">Annotators</h2>
+          <ul></ul>
+        </div>
+      </div>
+    </main>
   );
 };
 
