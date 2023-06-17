@@ -6,6 +6,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import MainNavigationButton from "@movies/components/MainNavigationButton";
 import { api } from "@movies/utils/api";
+import generateRoomCode from "@movies/utils/generateRoomCode";
 import { type NextPage } from "next";
 import { signIn, signOut, useSession } from "next-auth/react";
 import Head from "next/head";
@@ -19,6 +20,20 @@ const Home: NextPage = () => {
 
   const { data: movieData, isLoading: movieLoading } =
     api.movie.getAllMovies.useQuery();
+
+  const { mutate: createRoom, isLoading: isCreatingRoom } =
+    api.room.createRoom.useMutation({
+      onSuccess(data) {
+        router
+          .push({
+            pathname: `/${data.roomCode}/host`,
+          })
+          .catch((err) => console.error(err));
+      },
+      onError: (e) => {
+        console.error(e);
+      },
+    });
 
   if (!session) {
     return (
@@ -64,27 +79,29 @@ const Home: NextPage = () => {
           <MainNavigationButton label="Create Room" icon={faPlus}>
             <div className="grid gap-2">
               <h3 className="text-lg font-bold">Host a Movie!</h3>
-              {movieLoading ? (
+              {movieLoading || isCreatingRoom ? (
                 <span className="mx-auto loading loading-spinner text-primary" />
               ) : (
                 <>
                   <p>Select a movie from the dropdown and press submit.</p>
                   <select ref={selectRef}>
                     {movieData?.map((movie) => (
-                      <option key={movie.id}>{movie.name}</option>
+                      <option key={movie.id} value={movie.id}>
+                        {movie.name}
+                      </option>
                     ))}
                   </select>
                   <button
                     className="btn-accent btn my-4 capitalize"
                     onClick={() => {
-                      const query = { key: selectRef.current?.value };
+                      const roomCode = generateRoomCode();
+                      const movieId = selectRef.current?.value;
 
-                      router
-                        .push({
-                          pathname: "/host",
-                          query,
-                        })
-                        .catch((err) => console.error(err));
+                      if (movieId === undefined) {
+                        throw new Error("Failed to get Selected Movie");
+                      }
+
+                      createRoom({ movieId, roomCode });
                     }}
                   >
                     Submit
