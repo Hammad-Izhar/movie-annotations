@@ -36,7 +36,7 @@ const Annotator: NextPage = () => {
 
   const { data: session, status } = useSession();
 
-  const [sessionAssignmentId, setSessionAssignmentId] = useState("");
+  const [sessionAssignmentId, setSessionAssignmentId] = useState<string>();
   const [annotations, setAnnotations] = useState<Omit<Annotation, "id">[]>([]);
   const annotationRef = useRef<HTMLInputElement>(null);
 
@@ -61,71 +61,86 @@ const Annotator: NextPage = () => {
    * 5. On frames, store the ratings
    * 6. When given the signal write to the database
    */
-  useEffect(
-    () => {
-      if (status === "unauthenticated" || !session || !room) {
-        // no user data, no database record for room
+  useEffect(() => {
+    if (status === "unauthenticated" || !session || !room) {
+      // no user data, no database record for room
+      return;
+    }
+
+    // Step (1) Setup the Ably Connection
+    const ably = new Ably.Realtime({
+      authUrl: "/api/ablyToken",
+      clientId: session.user.id,
+    });
+    const ablyRoom = ably.channels.get(roomCode);
+
+    // Step (2) Let host know you are present
+    void ablyRoom.presence
+      .enter({ name: session.user.name })
+      .then(() => console.log("entered room"));
+
+    // Step (3) Wait for an assignment
+    void ablyRoom.subscribe("assignment", (msg) => {
+      const result = annotatorAssignmentSchema.safeParse(msg.data);
+      if (!result.success) {
+        return console.error(result.error);
+      }
+      if (result.data.for !== session.user.id) {
         return;
       }
 
-      // Step (1) Setup the Ably Connection
-      const ably = new Ably.Realtime({
-        authUrl: "/api/ablyToken",
-        clientId: session.user.id,
+      createSessionAssignment({
+        roomId: room.id,
+        userId: session.user.id,
+        ...result.data,
       });
-      const ablyRoom = ably.channels.get(roomCode);
+    });
 
-      // Step (2) Let host know you are present
-      void ablyRoom.presence.enter({ name: session.user.name });
+    // Step (4) Wait for frames
+    void ablyRoom.subscribe("frame", (msg) => {
+      if (sessionAssignmentId === undefined) {
+        return;
+      }
 
-      // Step (3) Wait for an assignment
-      void ablyRoom.subscribe("assignment", (msg) => {
-        const result = annotatorAssignmentSchema.safeParse(msg.data);
-        if (!result.success) {
-          return console.error(result.error);
-        }
-        if (result.data.for !== session.user.id) {
-          return;
-        }
+      const result = frameSchema.safeParse(msg.data);
+      if (!result.success) {
+        return console.error(result.error);
+      }
 
-        createSessionAssignment({
-          roomId: room.id,
-          userId: session.user.id,
-          ...result.data,
-        });
-      });
+      setAnnotations((prev) => [
+        ...prev,
+        {
+          frameNumber: result.data.frameNumber,
+          sessionAssignmentId: sessionAssignmentId,
+          valence: convertValence(annotationRef.current?.value),
+          createdAt: new Date(),
+        },
+      ]);
+    });
 
-      // Step (4) Wait for frames
-      void ablyRoom.subscribe("frame", (msg) => {
-        const result = frameSchema.safeParse(msg.data);
-        if (!result.success) {
-          return console.error(result.error);
-        }
+    // Step (5) Write all the annotations
+    void ablyRoom.subscribe("writeAnnotations", () => {
+      createManyAnnotations(annotations);
+    });
 
-        setAnnotations((prev) => [
-          ...prev,
-          {
-            frameNumber: result.data.frameNumber,
-            sessionAssignmentId: sessionAssignmentId,
-            valence: convertValence(annotationRef.current?.value),
-            createdAt: new Date(),
-          },
-        ]);
-      });
+    const cleanup = () => {
+      void ablyRoom.presence.leave({ name: session.user.name });
+    };
+    router.events.on("routeChangeStart", cleanup);
 
-      // Step (5) Write all the annotations
-      void ablyRoom.subscribe("writeAnnotations", () => {
-        createManyAnnotations(annotations);
-      });
-
-      return () => {
-        console.log("cleanup goes here!");
-      };
-    },
-    [
-      /* fill out dependency array properly */
-    ]
-  );
+    return () => {
+      router.events.off("routeChangeStart", cleanup);
+    };
+  }, [
+    createManyAnnotations,
+    createSessionAssignment,
+    room,
+    roomCode,
+    router.events,
+    session,
+    sessionAssignmentId,
+    status,
+  ]);
 
   // useEffect(() => {
   //   if (status === "unauthenticated" || !session) {
