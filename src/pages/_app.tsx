@@ -1,4 +1,5 @@
 import "@movies/styles/globals.css";
+
 import { api } from "@movies/utils/api";
 import { type Session } from "next-auth";
 import { SessionProvider } from "next-auth/react";

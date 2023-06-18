@@ -16,7 +16,6 @@
  */
 import { getServerAuthSession } from "@movies/server/auth";
 import { prisma } from "@movies/server/db";
-
 /**
  * 2. INITIALIZATION
  *
@@ -24,7 +23,7 @@ import { prisma } from "@movies/server/db";
  * ZodErrors so that you get typesafety on the frontend if your procedure fails due to validation
  * errors on the backend.
  */
-import { TRPCError, initTRPC } from "@trpc/server";
+import { initTRPC, TRPCError } from "@trpc/server";
 import { type CreateNextContextOptions } from "@trpc/server/adapters/next";
 import { type Session } from "next-auth";
 import superjson from "superjson";

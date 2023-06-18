@@ -1,4 +1,5 @@
 import "@fortawesome/fontawesome-svg-core/styles.css";
+
 import {
   faGears,
   faPeopleGroup,
@@ -10,7 +11,7 @@ import generateRoomCode from "@movies/utils/generateRoomCode";
 import { type NextPage } from "next";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/router";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 
 const HostRoom = () => {
   const router = useRouter();
@@ -37,7 +38,7 @@ const HostRoom = () => {
     <div className="grid gap-2">
       <h3 className="text-lg font-bold">Host a Movie!</h3>
       {isMovieLoading || isCreatingRoom ? (
-        <span className="mx-auto loading loading-spinner text-primary" />
+        <span className="loading loading-spinner mx-auto text-primary" />
       ) : (
         <>
           <p>Select a movie from the dropdown and press submit.</p>
@@ -134,9 +135,9 @@ const Home: NextPage = () => {
           </button>
         </>
       ) : (
-        <div className="h-full flex justify-center items-center">
+        <div className="flex h-full items-center justify-center">
           <button
-            className="btn btn-primary"
+            className="btn-primary btn"
             onClick={() => void signIn("google")}
           >
             Sign in with Google

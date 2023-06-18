@@ -1,9 +1,12 @@
 import "@fortawesome/fontawesome-svg-core/styles.css";
+
 import { faPersonWalkingArrowRight } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import AnnotationInput from "@movies/components/AnnotationInput";
+import { api } from "@movies/utils/api";
 import Ably from "ably/promises";
 import { type NextPage } from "next";
+import { useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -11,37 +14,44 @@ import { useEffect } from "react";
 
 const Annotator: NextPage = () => {
   const router = useRouter();
-  const roomCode = router.query.roomCode;
+  const roomCode = router.query.roomCode as string;
 
-  useEffect(() => {
-    if (typeof roomCode != "string") {
-      return;
-    }
+  const { data } = api.room.getRoomByCode.useQuery({ roomCode });
+  const { data: session, status } = useSession();
 
-    const ably = new Ably.Realtime({
-      authUrl: "/api/ablyToken",
-      clientId: `hammad ${new Date().toISOString()}`,
-    });
+  if (data) {
+    const { movie } = data;
+  }
 
-    const room = ably.channels.get(roomCode);
-    void room.presence.enter();
+  // useEffect(() => {
+  //   if (status === "unauthenticated" || !session) {
+  //     return;
+  //   }
 
-    void room.subscribe("frame", (msg) => {
-      console.log(msg);
-    });
+  //   const ably = new Ably.Realtime({
+  //     authUrl: "/api/ablyToken",
+  //     clientId: session.user.id,
+  //   });
 
-    const cleanup = () => {
-      void room.presence.leave();
-    };
-    router.events.on("routeChangeStart", cleanup);
+  //   const room = ably.channels.get(roomCode);
+  //   void room.presence.enter({ name: session.user.name });
 
-    return () => {
-      router.events.off("routeChangeStart", cleanup);
-    };
-  }, [roomCode, router.events]);
+  //   void room.subscribe("frame", (msg) => {
+  //     console.log(msg);
+  //   });
+
+  //   const cleanup = () => {
+  //     void room.presence.leave({ name: session.user.name });
+  //   };
+
+  //   router.events.on("routeChangeStart", cleanup);
+  //   return () => {
+  //     router.events.off("routeChangeStart", cleanup);
+  //   };
+  // }, [roomCode, router.events, session, status]);
 
   return (
-    <main className="flex">
+    <main className="py-0 flex flex-col">
       <div className="flex justify-between py-4 text-lg">
         <Link href="/" className="flex items-baseline justify-center gap-2">
           <FontAwesomeIcon icon={faPersonWalkingArrowRight} flip="horizontal" />

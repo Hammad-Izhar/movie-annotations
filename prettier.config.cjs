@@ -1,6 +1,20 @@
-/** @type {import("prettier").Config} */
+/** @type {import("@ianvs/prettier-plugin-sort-imports").PrettierConfig} */
 const config = {
-  plugins: [require.resolve("prettier-plugin-tailwindcss"), require.resolve('@trivago/prettier-plugin-sort-imports')]
+  importOrder: [
+    "^@core/(.*)$",
+    "",
+    "^@server/(.*)$",
+    "",
+    "^@ui/(.*)$",
+    "",
+    "^[./]",
+  ],
+  importOrderParserPlugins: ["typescript", "jsx", "decorators-legacy"],
+  importOrderTypeScriptVersion: "5.0.0",
+  plugins: [
+    require("prettier-plugin-tailwindcss"),
+    require("@ianvs/prettier-plugin-sort-imports"),
+  ],
 };
 
 module.exports = config;

@@ -3,9 +3,9 @@ import { prisma } from "@movies/server/db";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { type GetServerSidePropsContext } from "next";
 import {
+  getServerSession,
   type DefaultSession,
   type NextAuthOptions,
-  getServerSession,
 } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 

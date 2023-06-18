@@ -1,4 +1,5 @@
 import "@fortawesome/fontawesome-svg-core/styles.css";
+
 import { faPersonWalkingArrowRight } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Ably from "ably/promises";
@@ -17,19 +18,23 @@ const HostPage: NextPage = () => {
   const router = useRouter();
   const roomCode = router.query.roomCode;
 
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
 
   const [annotators, setAnnotators] = useState(new Set<string>());
   const [isPlaying, setIsPlaying] = useState(false);
 
   useEffect(() => {
-    if (typeof roomCode != "string") {
+    if (
+      typeof roomCode != "string" ||
+      status === "unauthenticated" ||
+      !session
+    ) {
       return;
     }
 
     const ably = new Ably.Realtime({
       authUrl: "/api/ablyToken",
-      clientId: `hammad ${new Date().toISOString()}`,
+      clientId: session.user.id,
     });
 
     const room = ably.channels.get(roomCode);
@@ -53,22 +58,11 @@ const HostPage: NextPage = () => {
           break;
       }
     });
+  }, [roomCode, status, session]);
 
-    const cleanup = () => {
-      () => ably.close();
-    };
-
-    window.addEventListener("beforeunload", cleanup);
-
-    return () => {
-      window.removeEventListener("beforeunload", cleanup);
-    };
-  }, [roomCode]);
-
-  if (!session) {
-    return <>Not Logged In</>;
+  if (status === "unauthenticated") {
+    return <p>Access Denied! Try logging in via the homepage!</p>;
   }
-
   return (
     <main>
       <div className="flex justify-between py-4 text-lg">
