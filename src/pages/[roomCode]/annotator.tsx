@@ -1,16 +1,18 @@
 import "@fortawesome/fontawesome-svg-core/styles.css";
 
-import { faPersonWalkingArrowRight } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import AnnotationInput from "@movies/components/AnnotationInput";
-import { api } from "@movies/utils/api";
+import { useSession } from "next-auth/react";
+import { useEffect } from "react";
+
+import { faPersonWalkingArrowRight } from "@fortawesome/free-solid-svg-icons";
 import Ably from "ably/promises";
 import { type NextPage } from "next";
-import { useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useEffect } from "react";
+
+import AnnotationInput from "@movies/components/AnnotationInput";
+import { api } from "@movies/utils/api";
 
 const Annotator: NextPage = () => {
   const router = useRouter();

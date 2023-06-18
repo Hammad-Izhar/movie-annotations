@@ -1,10 +1,11 @@
+import { TRPCError } from "@trpc/server";
+import { z } from "zod";
+
 import {
   createTRPCRouter,
   protectedProcedure,
   publicProcedure,
 } from "@movies/server/api/trpc";
-import { TRPCError } from "@trpc/server";
-import { z } from "zod";
 
 export const roomRouter = createTRPCRouter({
   getRoomByCode: publicProcedure

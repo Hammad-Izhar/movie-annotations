@@ -1,14 +1,15 @@
 import "@fortawesome/fontawesome-svg-core/styles.css";
 
-import { faPersonWalkingArrowRight } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useSession } from "next-auth/react";
+import React, { useEffect, useState } from "react";
+
+import { faPersonWalkingArrowRight } from "@fortawesome/free-solid-svg-icons";
 import Ably from "ably/promises";
 import { type NextPage } from "next";
-import { useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import React, { useEffect, useState } from "react";
 
 const VideoPlayer = dynamic(() => import("@movies/components/Video"), {
   ssr: false,

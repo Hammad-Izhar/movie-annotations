@@ -1,5 +1,6 @@
-import Ably from "ably";
 import type { NextApiRequest, NextApiResponse } from "next";
+
+import Ably from "ably";
 
 export default async function ablyTokenHandler(
   req: NextApiRequest,

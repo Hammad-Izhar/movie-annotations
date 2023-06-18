@@ -1,10 +1,10 @@
-import { createTRPCRouter } from "@movies/server/api/trpc";
-
 import { annotationRouter } from "./routers/annotation";
 import { movieRouter } from "./routers/movie";
 import { roomRouter } from "./routers/room";
 import { sessionAssignmentRouter } from "./routers/sessionAssignment";
 import { userRouter } from "./routers/user";
+
+import { createTRPCRouter } from "@movies/server/api/trpc";
 
 /**
  * This is the primary router for your server.

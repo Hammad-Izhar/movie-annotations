@@ -1,5 +1,6 @@
-import { env } from "@movies/env.mjs";
 import { PrismaClient } from "@prisma/client";
+
+import { env } from "@movies/env.mjs";
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;

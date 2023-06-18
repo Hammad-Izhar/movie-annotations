@@ -1,17 +1,20 @@
-import "@fortawesome/fontawesome-svg-core/styles.css";
+import type { NextPage } from "next";
+
+import { signIn, signOut, useSession } from "next-auth/react";
+import { useRef, useState } from "react";
 
 import {
   faGears,
   faPeopleGroup,
   faPlus,
 } from "@fortawesome/free-solid-svg-icons";
+import { useRouter } from "next/router";
+
 import MainNavigationButton from "@movies/components/MainNavigationButton";
 import { api } from "@movies/utils/api";
 import generateRoomCode from "@movies/utils/generateRoomCode";
-import { type NextPage } from "next";
-import { signIn, signOut, useSession } from "next-auth/react";
-import { useRouter } from "next/router";
-import { useRef, useState } from "react";
+
+import "@fortawesome/fontawesome-svg-core/styles.css";
 
 const HostRoom = () => {
   const router = useRouter();

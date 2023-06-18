@@ -1,5 +1,6 @@
-import clsx from "clsx";
 import { useEffect, useState } from "react";
+
+import clsx from "clsx";
 
 type Rating = undefined | 1 | 2 | 3 | 4 | 5;
 
