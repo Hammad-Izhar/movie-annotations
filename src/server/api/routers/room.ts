@@ -16,6 +16,18 @@ export const roomRouter = createTRPCRouter({
       });
     }),
 
+  checkIfRoomIsActive: publicProcedure
+    .input(z.object({ roomCode: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const room = await ctx.prisma.room.findUnique({
+        where: {
+          roomCode: input.roomCode,
+        },
+      });
+
+      return room !== null && room.isActive;
+    }),
+
   createRoom: protectedProcedure
     .input(z.object({ roomCode: z.string(), movieId: z.string() }))
     .mutation(({ ctx, input }) => {
