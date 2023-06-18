@@ -3,11 +3,7 @@ import type { NextPage } from "next";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { useRef, useState } from "react";
 
-import {
-  faGears,
-  faPeopleGroup,
-  faPlus,
-} from "@fortawesome/free-solid-svg-icons";
+import { faGears, faPeopleGroup, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { useRouter } from "next/router";
 
 import MainNavigationButton from "@movies/components/MainNavigationButton";
@@ -20,22 +16,20 @@ const HostRoom = () => {
   const router = useRouter();
   const selectRef = useRef<HTMLSelectElement>(null);
 
-  const { data: movieData, isLoading: isMovieLoading } =
-    api.movie.getAllMovies.useQuery();
+  const { data: movieData, isLoading: isMovieLoading } = api.movie.getAllMovies.useQuery();
 
-  const { mutate: createRoom, isLoading: isCreatingRoom } =
-    api.room.createRoom.useMutation({
-      onSuccess(data) {
-        router
-          .push({
-            pathname: `/${data.roomCode}/host`,
-          })
-          .catch((err) => console.error(err));
-      },
-      onError: (e) => {
-        console.error(e);
-      },
-    });
+  const { mutate: createRoom, isLoading: isCreatingRoom } = api.room.createRoom.useMutation({
+    onSuccess(data) {
+      router
+        .push({
+          pathname: `/${data.roomCode}/host`,
+        })
+        .catch((err) => console.error(err));
+    },
+    onError: (e) => {
+      console.error(e);
+    },
+  });
 
   return (
     <div className="grid gap-2">
@@ -94,10 +88,7 @@ const JoinRoom = () => {
         type="text"
         onChange={(e) => setRoomCode(e.target.value)}
       />
-      <button
-        className="btn-accent btn my-4 capitalize"
-        onClick={() => void refetch()}
-      >
+      <button className="btn-accent btn my-4 capitalize" onClick={() => void refetch()}>
         Submit
       </button>
     </div>
@@ -139,10 +130,7 @@ const Home: NextPage = () => {
         </>
       ) : (
         <div className="flex h-full items-center justify-center">
-          <button
-            className="btn-primary btn"
-            onClick={() => void signIn("google")}
-          >
+          <button className="btn-primary btn" onClick={() => void signIn("google")}>
             Sign in with Google
           </button>
         </div>

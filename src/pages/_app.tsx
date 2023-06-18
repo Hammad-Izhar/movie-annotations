@@ -16,10 +16,7 @@ const MyApp: AppType<{ session: Session | null }> = ({
     <>
       <Head>
         <title>Movie Annotator</title>
-        <meta
-          name="description"
-          content="Movie Annotation Software for Asaad Lab"
-        />
+        <meta name="description" content="Movie Annotation Software for Asaad Lab" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <SessionProvider session={session}>

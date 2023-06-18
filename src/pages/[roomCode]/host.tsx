@@ -25,11 +25,7 @@ const HostPage: NextPage = () => {
   const [isPlaying, setIsPlaying] = useState(false);
 
   useEffect(() => {
-    if (
-      typeof roomCode != "string" ||
-      status === "unauthenticated" ||
-      !session
-    ) {
+    if (typeof roomCode != "string" || status === "unauthenticated" || !session) {
       return;
     }
 
@@ -79,10 +75,7 @@ const HostPage: NextPage = () => {
         <div className="basis-5/6 grid place-items-center gap-4">
           <VideoPlayer />
           <div className="flex gap-4">
-            <button
-              className="btn btn-primary"
-              onClick={() => setIsPlaying((val) => !val)}
-            >
+            <button className="btn btn-primary" onClick={() => setIsPlaying((val) => !val)}>
               {isPlaying ? "Pause" : "Play"}
             </button>
           </div>

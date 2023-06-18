@@ -10,11 +10,7 @@ interface ButtonProps {
   label?: string;
 }
 
-const MainNavigationButton = ({
-  label,
-  icon,
-  children,
-}: PropsWithChildren<ButtonProps>) => {
+const MainNavigationButton = ({ label, icon, children }: PropsWithChildren<ButtonProps>) => {
   const modalRef = useRef<HTMLDialogElement>(null);
 
   return (

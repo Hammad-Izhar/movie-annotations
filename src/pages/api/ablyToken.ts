@@ -2,10 +2,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 
 import Ably from "ably";
 
-export default async function ablyTokenHandler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
+export default async function ablyTokenHandler(req: NextApiRequest, res: NextApiResponse) {
   const ably = new Ably.Realtime.Promise({
     key: "xVLyHw.dkVsSg:PBP8PaJ33RSRcG2K2xaiyM14RbOTr99a1foh5jWiwYs",
   });
