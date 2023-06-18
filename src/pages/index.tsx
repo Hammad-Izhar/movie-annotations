@@ -1,6 +1,6 @@
 import type { NextPage } from "next";
 
-import { signIn, signOut, useSession } from "next-auth/react";
+import { getSession, signIn, signOut, useSession } from "next-auth/react";
 import { useRef, useState } from "react";
 
 import { faGears, faPeopleGroup, faPlus } from "@fortawesome/free-solid-svg-icons";
@@ -11,6 +11,46 @@ import { api } from "@movies/utils/api";
 import generateRoomCode from "@movies/utils/generateRoomCode";
 
 import "@fortawesome/fontawesome-svg-core/styles.css";
+
+const Home: NextPage = () => {
+  const { data: session } = useSession();
+
+  return (
+    <main>
+      <h1 className="pb-10 text-center text-6xl">Movie Annotations</h1>
+      {session ? (
+        <>
+          <div className="flex flex-col flex-wrap items-center justify-center gap-10 lg:flex-row">
+            <MainNavigationButton label="Create Room" icon={faPlus}>
+              <HostRoom />
+            </MainNavigationButton>
+
+            <MainNavigationButton label="Join Room" icon={faPeopleGroup}>
+              <JoinRoom />
+            </MainNavigationButton>
+
+            <MainNavigationButton label="View Data" icon={faGears}>
+              <ViewData />
+            </MainNavigationButton>
+          </div>
+          {/* TODO: Visualize this in a better place */}
+          <p>
+            Signed in as {session.user.name} ({session.user.email})
+          </p>
+          <button className="button" onClick={() => void signOut()}>
+            Sign Out
+          </button>
+        </>
+      ) : (
+        <div className="flex h-full items-center justify-center">
+          <button className="btn-primary btn" onClick={() => void signIn("google")}>
+            Sign in with Google
+          </button>
+        </div>
+      )}
+    </main>
+  );
+};
 
 const HostRoom = () => {
   const router = useRouter();
@@ -97,46 +137,6 @@ const JoinRoom = () => {
 
 const ViewData = () => {
   return <div></div>;
-};
-
-const Home: NextPage = () => {
-  const { data: session } = useSession();
-
-  return (
-    <main>
-      <h1 className="pb-10 text-center text-6xl">Movie Annotations</h1>
-      {session ? (
-        <>
-          <div className="flex flex-col flex-wrap items-center justify-center gap-10 lg:flex-row">
-            <MainNavigationButton label="Create Room" icon={faPlus}>
-              <HostRoom />
-            </MainNavigationButton>
-
-            <MainNavigationButton label="Join Room" icon={faPeopleGroup}>
-              <JoinRoom />
-            </MainNavigationButton>
-
-            <MainNavigationButton label="View Data" icon={faGears}>
-              <ViewData />
-            </MainNavigationButton>
-          </div>
-          {/* TODO: Visualize this in a better place */}
-          <p>
-            Signed in as {session.user.name} ({session.user.email})
-          </p>
-          <button className="button" onClick={() => void signOut()}>
-            Sign Out
-          </button>
-        </>
-      ) : (
-        <div className="flex h-full items-center justify-center">
-          <button className="btn-primary btn" onClick={() => void signIn("google")}>
-            Sign in with Google
-          </button>
-        </div>
-      )}
-    </main>
-  );
 };
 
 export default Home;

@@ -45,9 +45,7 @@ model Room {
 }
 
 model SessionAssignment {
-    id        String   @id @default(auto()) @map("_id") @db.ObjectId
-    startTime DateTime
-    stopTime  DateTime
+    id String @id @default(auto()) @map("_id") @db.ObjectId
 
     userId    String  @db.ObjectId
     roomId    String  @db.ObjectId

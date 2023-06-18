@@ -1,10 +1,14 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import clsx from "clsx";
 
 type Rating = undefined | 1 | 2 | 3 | 4 | 5;
 
-const AnnotationInput = () => {
+interface AnnotationInputProps {
+  sliderRef: React.Ref<HTMLInputElement>;
+}
+
+const AnnotationInput = ({ sliderRef }: AnnotationInputProps) => {
   const [selectedRating, setSelectedRating] = useState<Rating>(undefined);
 
   return (
@@ -51,6 +55,7 @@ const AnnotationInput = () => {
           5
         </div>
         <input
+          ref={sliderRef}
           type="range"
           className="absolute h-full w-full"
           onPointerUp={() => setSelectedRating(undefined)}
