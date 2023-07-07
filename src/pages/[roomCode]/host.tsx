@@ -25,32 +25,44 @@ const emotions: Emotion[] = ["ANGER", "DISGUST", "FEAR", "HAPPINESS", "SADNESS",
 const annotatorJoinSchema = z.object({ name: z.string() });
 
 const HostPage: NextPage = () => {
+  // Grab the auto-generated room code from the URL
   const router = useRouter();
   const roomCode = router.query.roomCode as string;
 
-  const { data: room } = api.room.getRoomByCode.useQuery({ roomCode });
+  // The active room in the database
+  const { data: room } = api.room.getRoomByCode.useQuery(
+    { roomCode },
+    { refetchOnWindowFocus: false }
+  );
+
+  // Ensure this page is protected by authentication
   const { data: session, status } = useSession();
 
+  // Annotators (ids -> names) connected to this room
   const [annotators, setAnnotators] = useState<Map<string, string>>(new Map());
-  const [ablyRoom, setAblyRoom] = useState<Ably.Types.RealtimeChannelPromise>();
+  // The Ably channel that users connect to
+  const [ablyChannel, setAblyChannel] = useState<Ably.Types.RealtimeChannelPromise>();
+  // Video Player State
   const [isPlaying, setIsPlaying] = useState(false);
 
+  // Annotation Assignment Refs
   const characterRef = useRef<HTMLSelectElement>(null);
   const emotionRef = useRef<HTMLSelectElement>(null);
 
+  // TODO: refactor to a custom connection hook that provides the channel and takes in a room, session, and callback
   useEffect(() => {
     if (status === "unauthenticated" || !session || !room) {
       // no user data, no database record for room
       return;
     }
+
     // Step (1) Setup the Ably Connection
     const ably = new Ably.Realtime({
       authUrl: "/api/ablyToken",
       clientId: session.user.id,
     });
-
     const ablyRoom = ably.channels.get(roomCode);
-    setAblyRoom(ablyRoom);
+    setAblyChannel(ablyRoom);
 
     // Step (2) Handle client join
     void ablyRoom.presence.subscribe((e) => {
@@ -103,7 +115,7 @@ const HostPage: NextPage = () => {
             playbackRate={0.5}
             onProgress={(e) => {
               console.log(e);
-              void ablyRoom?.publish("frame", { frameNumber: e.playedSeconds });
+              void ablyChannel?.publish("frame", { frameNumber: e.playedSeconds });
             }}
             playing={isPlaying}
             controls={false}
@@ -120,6 +132,7 @@ const HostPage: NextPage = () => {
             {[...annotators.entries()].map(([id, name]) => (
               <li key={id}>
                 <span>{name}</span>
+                {/* TODO: Update database schema, characters should have a name and a pfp */}
                 <select ref={characterRef}>
                   {room?.movie.characters.map((character) => (
                     <option key={character}>{character}</option>
@@ -135,7 +148,7 @@ const HostPage: NextPage = () => {
                 <button
                   className="btn"
                   onClick={() => {
-                    void ablyRoom?.publish("assignment", {
+                    void ablyChannel?.publish("assignment", {
                       for: id,
                       character: characterRef.current?.value,
                       imgUrl: "",
