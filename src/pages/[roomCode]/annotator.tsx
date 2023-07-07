@@ -81,6 +81,7 @@ const Annotator: NextPage = () => {
 
     // Step (3) Wait for an assignment
     void ablyRoom.subscribe("assignment", (msg) => {
+      console.log(msg);
       const result = annotatorAssignmentSchema.safeParse(msg.data);
       if (!result.success) {
         return console.error(result.error);
@@ -141,33 +142,6 @@ const Annotator: NextPage = () => {
     sessionAssignmentId,
     status,
   ]);
-
-  // useEffect(() => {
-  //   if (status === "unauthenticated" || !session) {
-  //     return;
-  //   }
-
-  //   const ably = new Ably.Realtime({
-  //     authUrl: "/api/ablyToken",
-  //     clientId: session.user.id,
-  //   });
-
-  //   const room = ably.channels.get(roomCode);
-  //   void room.presence.enter({ name: session.user.name });
-
-  //   void room.subscribe("frame", (msg) => {
-  //     console.log(msg);
-  //   });
-
-  //   const cleanup = () => {
-  //     void room.presence.leave({ name: session.user.name });
-  //   };
-
-  //   router.events.on("routeChangeStart", cleanup);
-  //   return () => {
-  //     router.events.off("routeChangeStart", cleanup);
-  //   };
-  // }, [roomCode, router.events, session, status]);
 
   return (
     <main className="py-0 flex flex-col">

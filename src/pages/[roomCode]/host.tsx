@@ -1,8 +1,10 @@
 import "@fortawesome/fontawesome-svg-core/styles.css";
 
+import type { Emotion } from "@prisma/client";
+
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useSession } from "next-auth/react";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import { faPersonWalkingArrowRight } from "@fortawesome/free-solid-svg-icons";
 import Ably from "ably/promises";
@@ -14,12 +16,11 @@ import { z } from "zod";
 
 import { api } from "@movies/utils/api";
 
-const VideoPlayer = dynamic(() => import("@movies/components/Video"), {
-  ssr: false,
-});
 const ReactPlayer = dynamic(() => import("react-player"), {
   ssr: false,
 });
+
+const emotions: Emotion[] = ["ANGER", "DISGUST", "FEAR", "HAPPINESS", "SADNESS", "SURPRISE"];
 
 const annotatorJoinSchema = z.object({ name: z.string() });
 
@@ -31,8 +32,11 @@ const HostPage: NextPage = () => {
   const { data: session, status } = useSession();
 
   const [annotators, setAnnotators] = useState<Map<string, string>>(new Map());
-  const [ablyClient, setAbly] = useState<Ably.Realtime>();
+  const [ablyRoom, setAblyRoom] = useState<Ably.Types.RealtimeChannelPromise>();
   const [isPlaying, setIsPlaying] = useState(false);
+
+  const characterRef = useRef<HTMLSelectElement>(null);
+  const emotionRef = useRef<HTMLSelectElement>(null);
 
   useEffect(() => {
     if (status === "unauthenticated" || !session || !room) {
@@ -45,9 +49,8 @@ const HostPage: NextPage = () => {
       clientId: session.user.id,
     });
 
-    setAbly(ably);
-
     const ablyRoom = ably.channels.get(roomCode);
+    setAblyRoom(ablyRoom);
 
     // Step (2) Handle client join
     void ablyRoom.presence.subscribe((e) => {
@@ -100,6 +103,7 @@ const HostPage: NextPage = () => {
             playbackRate={0.5}
             onProgress={(e) => {
               console.log(e);
+              void ablyRoom?.publish("frame", { frameNumber: e.playedSeconds });
             }}
             playing={isPlaying}
             controls={false}
@@ -116,8 +120,31 @@ const HostPage: NextPage = () => {
             {[...annotators.entries()].map(([id, name]) => (
               <li key={id}>
                 <span>{name}</span>
-                <select></select>
-                <select></select>
+                <select ref={characterRef}>
+                  {room?.movie.characters.map((character) => (
+                    <option key={character}>{character}</option>
+                  ))}
+                </select>
+                <select ref={emotionRef}>
+                  {emotions.map((emotion) => (
+                    <option className="capitalize" key={emotion}>
+                      {emotion}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  className="btn"
+                  onClick={() => {
+                    void ablyRoom?.publish("assignment", {
+                      for: id,
+                      character: characterRef.current?.value,
+                      imgUrl: "",
+                      emotion: emotionRef.current?.value,
+                    });
+                  }}
+                >
+                  Submit!
+                </button>
               </li>
             ))}
           </ul>
@@ -128,14 +155,3 @@ const HostPage: NextPage = () => {
 };
 
 export default HostPage;
-
-// TODO:
-// * Grab the selected movie from the database
-// * Load the movie from YouTube
-// * Setup connection to the annotators
-// * Show how many annotators are connected
-// * Add pause/play functionality
-// * Assign annotators to a character
-// * Manage playable blocks?
-// * Send frame to annotator
-// * Get Auth Working <----- next biggest hurdle
