@@ -175,7 +175,8 @@ const Annotator: NextPage = () => {
           <div className="grid place-items-center">
             <Image
               className="place-items-center"
-              src={sessionAssignment?.url ?? "/profile.png"}
+              // src={sessionAssignment?.url ?? "/profile.png"}
+              src="/profile.png"
               alt="character"
               width={300}
               height={300}
