@@ -14,8 +14,6 @@
  *
  * These allow you to access things when processing a request, like the database, the session, etc.
  */
-import { getServerAuthSession } from "@movies/server/auth";
-import { prisma } from "@movies/server/db";
 
 /**
  * 2. INITIALIZATION
@@ -24,11 +22,14 @@ import { prisma } from "@movies/server/db";
  * ZodErrors so that you get typesafety on the frontend if your procedure fails due to validation
  * errors on the backend.
  */
-import { TRPCError, initTRPC } from "@trpc/server";
+import { initTRPC, TRPCError } from "@trpc/server";
 import { type CreateNextContextOptions } from "@trpc/server/adapters/next";
 import { type Session } from "next-auth";
 import superjson from "superjson";
 import { ZodError } from "zod";
+
+import { getServerAuthSession } from "@movies/server/auth";
+import { prisma } from "@movies/server/db";
 
 type CreateContextOptions = {
   session: Session | null;
@@ -75,8 +76,7 @@ const t = initTRPC.context<typeof createTRPCContext>().create({
       ...shape,
       data: {
         ...shape.data,
-        zodError:
-          error.cause instanceof ZodError ? error.cause.flatten() : null,
+        zodError: error.cause instanceof ZodError ? error.cause.flatten() : null,
       },
     };
   },

@@ -1,4 +1,9 @@
-import { exampleRouter } from "@movies/server/api/routers/example";
+import { annotationRouter } from "./routers/annotation";
+import { movieRouter } from "./routers/movie";
+import { roomRouter } from "./routers/room";
+import { sessionAssignmentRouter } from "./routers/sessionAssignment";
+import { userRouter } from "./routers/user";
+
 import { createTRPCRouter } from "@movies/server/api/trpc";
 
 /**
@@ -7,7 +12,11 @@ import { createTRPCRouter } from "@movies/server/api/trpc";
  * All routers added in /api/routers should be manually added here.
  */
 export const appRouter = createTRPCRouter({
-  example: exampleRouter,
+  annotation: annotationRouter,
+  movie: movieRouter,
+  sessionAssignment: sessionAssignmentRouter,
+  user: userRouter,
+  room: roomRouter,
 });
 
 // export type definition of API

@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+main {
+  @apply min-h-screen bg-gradient-to-bl from-[#b0e5d0] to-[#5ccaee69] px-4 py-10 text-black;
+}
+
 /********** Range Input Styles **********/
 /*Range Reset*/
 input[type="range"] {

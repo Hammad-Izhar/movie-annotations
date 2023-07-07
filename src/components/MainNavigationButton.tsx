@@ -1,17 +1,16 @@
-import { type IconDefinition } from "@fortawesome/fontawesome-svg-core";
+import type { PropsWithChildren } from "react";
+
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { type PropsWithChildren, useRef } from "react";
+import { useRef } from "react";
+
+import { type IconDefinition } from "@fortawesome/fontawesome-svg-core";
 
 interface ButtonProps {
   icon: IconDefinition;
   label?: string;
 }
 
-const MainNavigationButton = ({
-  label,
-  icon,
-  children,
-}: PropsWithChildren<ButtonProps>) => {
+const MainNavigationButton = ({ label, icon, children }: PropsWithChildren<ButtonProps>) => {
   const modalRef = useRef<HTMLDialogElement>(null);
 
   return (

@@ -1,47 +1,88 @@
-import { faPersonWalkingArrowRight } from "@fortawesome/free-solid-svg-icons";
+import "@fortawesome/fontawesome-svg-core/styles.css";
+
+import type { Emotion } from "@prisma/client";
+
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useSession } from "next-auth/react";
+import React, { useEffect, useRef, useState } from "react";
+
+import { faPersonWalkingArrowRight } from "@fortawesome/free-solid-svg-icons";
 import Ably from "ably/promises";
 import { type NextPage } from "next";
 import dynamic from "next/dynamic";
-import Head from "next/head";
+import Link from "next/link";
 import { useRouter } from "next/router";
-import { useEffect, useRef, useState } from "react";
+import { z } from "zod";
 
-const ReactPlayer = dynamic(() => import("react-player"), { ssr: false });
+import { api } from "@movies/utils/api";
+
+const ReactPlayer = dynamic(() => import("react-player"), {
+  ssr: false,
+});
+
+const emotions: Emotion[] = ["ANGER", "DISGUST", "FEAR", "HAPPINESS", "SADNESS", "SURPRISE"];
+
+const annotatorJoinSchema = z.object({ name: z.string() });
 
 const HostPage: NextPage = () => {
+  // Grab the auto-generated room code from the URL
   const router = useRouter();
-  const roomCode = router.query.roomCode;
+  const roomCode = router.query.roomCode as string;
 
-  const [annotators, setAnnotators] = useState(new Set<string>());
+  // The active room in the database
+  const { data: room } = api.room.getRoomByCode.useQuery(
+    { roomCode },
+    { refetchOnWindowFocus: false }
+  );
 
-  const videoRef = useRef<typeof ReactPlayer>(null);
+  // Ensure this page is protected by authentication
+  const { data: session, status } = useSession();
+
+  // Annotators (ids -> names) connected to this room
+  const [annotators, setAnnotators] = useState<Map<string, string>>(new Map());
+  // The Ably channel that users connect to
+  const [ablyChannel, setAblyChannel] = useState<Ably.Types.RealtimeChannelPromise>();
+  // Video Player State
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isFullscreen, setIsFullscreen] = useState(false);
 
+  // Annotation Assignment Refs
+  const characterRef = useRef<HTMLSelectElement>(null);
+  const emotionRef = useRef<HTMLSelectElement>(null);
+
+  // TODO: refactor to a custom connection hook that provides the channel and takes in a room, session, and callback
   useEffect(() => {
-    if (typeof roomCode != "string") {
+    if (status === "unauthenticated" || !session || !room) {
+      // no user data, no database record for room
       return;
     }
 
+    // Step (1) Setup the Ably Connection
     const ably = new Ably.Realtime({
       authUrl: "/api/ablyToken",
-      clientId: `hammad ${new Date().toISOString()}`,
+      clientId: session.user.id,
     });
+    const ablyRoom = ably.channels.get(roomCode);
+    setAblyChannel(ablyRoom);
 
-    const room = ably.channels.get(roomCode);
+    // Step (2) Handle client join
+    void ablyRoom.presence.subscribe((e) => {
+      const result = annotatorJoinSchema.safeParse(e.data);
 
-    void room.presence.subscribe((e) => {
+      if (!result.success) {
+        return console.error(result.error);
+      }
+
       switch (e.action) {
         case "enter":
           setAnnotators((oldAnnotators) => {
-            const newAnnotators = new Set(oldAnnotators);
-            return newAnnotators.add(e.clientId);
+            const newAnnotators = new Map(oldAnnotators);
+            newAnnotators.set(e.clientId, result.data.name);
+            return newAnnotators;
           });
           break;
         case "leave":
           setAnnotators((oldAnnotators) => {
-            const newAnnotators = new Set(oldAnnotators);
+            const newAnnotators = new Map(oldAnnotators);
             newAnnotators.delete(e.clientId);
             return newAnnotators;
           });
@@ -50,77 +91,80 @@ const HostPage: NextPage = () => {
           break;
       }
     });
+  }, [room, roomCode, session, status]);
 
-    const cleanup = () => {
-      () => ably.close();
-    };
-
-    window.addEventListener("beforeunload", cleanup);
-    return () => {
-      window.removeEventListener("beforeunload", cleanup);
-    };
-  }, [roomCode]);
+  if (status === "unauthenticated") {
+    return <p>Access Denied! Try logging in via the homepage!</p>;
+  }
 
   return (
-    <>
-      <Head>
-        <title>Movie Annotater</title>
-        <meta
-          name="description"
-          content="Movie Annotation Software for Asaad Lab"
-        />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-      <main className="min-h-screen bg-gradient-to-bl from-[#b0e5d0] to-[#5ccaee69] px-4 text-black">
-        <div className="flex justify-between py-4 text-lg">
-          <a className="flex items-baseline justify-center gap-2" href="">
-            <FontAwesomeIcon
-              icon={faPersonWalkingArrowRight}
-              flip="horizontal"
-            />
-            Leave
-          </a>
-          <span className="font-bold">{roomCode}</span>
-          <span>Num Annotators: {annotators.size}</span>
-        </div>
+    <main className="py-0">
+      <div className="flex justify-between py-4 text-lg">
+        <Link href="/" className="flex items-baseline justify-center gap-2">
+          <FontAwesomeIcon icon={faPersonWalkingArrowRight} flip="horizontal" />
+          Leave
+        </Link>
+        <span className="font-bold">{roomCode}</span>
+        <span>Num Annotators: {annotators.size}</span>
+      </div>
 
-        <div className="flex">
-          <div className="basis-5/6 grid place-items-center gap-4">
-            <ReactPlayer
-              url="https://www.youtube.com/watch?v=EZ1yCdoybSw"
-              ref={videoRef}
-              controls={false}
-              playing={isPlaying}
-              playbackRate={0.5}
-            />
-            <div className="flex gap-4">
-              <button
-                className="btn btn-primary"
-                onClick={() => setIsPlaying((val) => !val)}
-              >
-                {isPlaying ? "Pause" : "Play"}
-              </button>
-            </div>
-          </div>
-          <div className="basis-1/6">
-            <h2 className="text-center font-bold">Annotators</h2>
-            <ul></ul>
+      <div className="flex">
+        <div className="basis-5/6 grid place-items-center gap-4">
+          <ReactPlayer
+            url={"https://www.youtube.com/watch?v=KMNhOUkpjaM"}
+            playbackRate={0.5}
+            onProgress={(e) => {
+              console.log(e);
+              void ablyChannel?.publish("frame", { frameNumber: e.playedSeconds });
+            }}
+            playing={isPlaying}
+            controls={false}
+          />
+          <div className="flex gap-4">
+            <button className="btn btn-primary" onClick={() => setIsPlaying((val) => !val)}>
+              {isPlaying ? "Pause" : "Play"}
+            </button>
           </div>
         </div>
-      </main>
-    </>
+        <div className="basis-1/6">
+          <h2 className="text-center font-bold">Annotators</h2>
+          <ul>
+            {[...annotators.entries()].map(([id, name]) => (
+              <li key={id}>
+                <span>{name}</span>
+                {/* TODO: Update database schema, characters should have a name and a pfp */}
+                <select ref={characterRef}>
+                  {room?.movie.characters.map((character) => (
+                    <option key={character}>{character}</option>
+                  ))}
+                </select>
+                <select ref={emotionRef}>
+                  {emotions.map((emotion) => (
+                    <option className="capitalize" key={emotion}>
+                      {emotion}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  className="btn"
+                  onClick={() => {
+                    void ablyChannel?.publish("assignment", {
+                      for: id,
+                      character: characterRef.current?.value,
+                      imgUrl: "",
+                      emotion: emotionRef.current?.value,
+                    });
+                  }}
+                >
+                  Submit!
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </main>
   );
 };
 
 export default HostPage;
-
-// TODO:
-// * Grab the selected movie from the database
-// * Load the movie from YouTube
-// * Setup connection to the annotators
-// * Show how many annotators are connected
-// * Add pause/play functionality
-// * Assign annotators to a character
-// * Manage playable blocks?
-// * Send frame to annotator
-// * Get Auth Working
