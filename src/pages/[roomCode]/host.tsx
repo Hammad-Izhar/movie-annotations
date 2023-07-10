@@ -124,6 +124,12 @@ const HostPage: NextPage = () => {
             <button className="btn btn-primary" onClick={() => setIsPlaying((val) => !val)}>
               {isPlaying ? "Pause" : "Play"}
             </button>
+            <button
+              className="btn btn-primary"
+              onClick={() => void ablyChannel?.publish("writeAnnotations", {})}
+            >
+              Write Annotations
+            </button>
           </div>
         </div>
         <div className="basis-1/3">
@@ -135,7 +141,7 @@ const HostPage: NextPage = () => {
                 {/* TODO: Update database schema, characters should have a name and a pfp */}
                 <div className="flex flex-col">
                   <select ref={characterRef}>
-                    {room?.movie.characters.map((character) => (
+                    {room?.movie?.characters.map((character) => (
                       <option key={character}>{character}</option>
                     ))}
                   </select>

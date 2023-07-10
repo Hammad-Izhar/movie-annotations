@@ -54,6 +54,7 @@ const Annotator: NextPage = () => {
   // Mass writes annotations for this user
   const { mutate: createManyAnnotations } = api.annotation.createManyAnnotations.useMutation({
     onSuccess: () => {
+      console.log(annotations.length);
       setAnnotations([]);
     },
   });
@@ -149,13 +150,17 @@ const Annotator: NextPage = () => {
   }, [ablyChannel, selectedRating, sessionAssignment]);
 
   useEffect(() => {
-    if (!ablyChannel) return;
+    if (!ablyChannel || annotations.length === 0) return;
 
     // Step (5) Write all the annotations
     const handleWriteAnnotations = () => {
       createManyAnnotations(annotations);
     };
     void ablyChannel.subscribe("writeAnnotations", handleWriteAnnotations);
+
+    return () => {
+      ablyChannel.unsubscribe("writeAnnotations");
+    };
   }, [ablyChannel, annotations, createManyAnnotations]);
 
   useEffect(() => {
@@ -172,8 +177,6 @@ const Annotator: NextPage = () => {
       router.events.off("routeChangeStart", cleanup);
     };
   }, [ablyChannel, ablyChannel?.presence, router.events, session]);
-
-  // useEffect(() => {}, [annotations]);
 
   return (
     <main className="py-0 flex flex-col">
