@@ -108,8 +108,8 @@ const HostPage: NextPage = () => {
         <span>Num Annotators: {annotators.size}</span>
       </div>
 
-      <div className="flex">
-        <div className="basis-5/6 grid place-items-center gap-4">
+      <div className="flex flex-wrap lg:flex-nowrap justify-center gap-4">
+        <div className="basis-2/3 grid place-items-center gap-4">
           <ReactPlayer
             url={"https://www.youtube.com/watch?v=KMNhOUkpjaM"}
             playbackRate={0.5}
@@ -126,25 +126,27 @@ const HostPage: NextPage = () => {
             </button>
           </div>
         </div>
-        <div className="basis-1/6">
+        <div className="basis-1/3">
           <h2 className="text-center font-bold">Annotators</h2>
           <ul>
             {[...annotators.entries()].map(([id, name]) => (
-              <li key={id}>
+              <li key={id} className="flex gap-2 items-center justify-center">
                 <span>{name}</span>
                 {/* TODO: Update database schema, characters should have a name and a pfp */}
-                <select ref={characterRef}>
-                  {room?.movie.characters.map((character) => (
-                    <option key={character}>{character}</option>
-                  ))}
-                </select>
-                <select ref={emotionRef}>
-                  {emotions.map((emotion) => (
-                    <option className="capitalize" key={emotion}>
-                      {emotion}
-                    </option>
-                  ))}
-                </select>
+                <div className="flex flex-col">
+                  <select ref={characterRef}>
+                    {room?.movie.characters.map((character) => (
+                      <option key={character}>{character}</option>
+                    ))}
+                  </select>
+                  <select ref={emotionRef}>
+                    {emotions.map((emotion) => (
+                      <option className="capitalize" key={emotion}>
+                        {emotion}
+                      </option>
+                    ))}
+                  </select>
+                </div>
                 <button
                   className="btn"
                   onClick={() => {
@@ -156,7 +158,7 @@ const HostPage: NextPage = () => {
                     });
                   }}
                 >
-                  Submit!
+                  Assign
                 </button>
               </li>
             ))}
