@@ -5,7 +5,7 @@ import type { NextPage } from "next";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useSession } from "next-auth/react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { faPersonWalkingArrowRight } from "@fortawesome/free-solid-svg-icons";
 import { Emotion } from "@prisma/client";
@@ -17,7 +17,9 @@ import { z } from "zod";
 
 import AnnotationInput from "@movies/components/AnnotationInput";
 import { api } from "@movies/utils/api";
-import convertValence from "@movies/utils/convertValence";
+import convertValence from "@movies/utils/convertRatingToValence";
+
+export type Rating = undefined | 1 | 2 | 3 | 4 | 5;
 
 const annotatorAssignmentSchema = z.object({
   for: z.string().nonempty(),
@@ -44,6 +46,7 @@ const Annotator: NextPage = () => {
   const { mutate: createSessionAssignment } =
     api.sessionAssignment.createSessionAssignment.useMutation({
       onSuccess: (data) => {
+        console.log(data);
         setSessionAssignment(data);
       },
       retry: 0,
@@ -51,6 +54,7 @@ const Annotator: NextPage = () => {
   // Mass writes annotations for this user
   const { mutate: createManyAnnotations } = api.annotation.createManyAnnotations.useMutation({
     onSuccess: () => {
+      console.log(annotations.length);
       setAnnotations([]);
     },
   });
@@ -64,9 +68,8 @@ const Annotator: NextPage = () => {
   const [sessionAssignment, setSessionAssignment] = useState<SessionAssignment>();
   // A buffer of Annotations waiting to be written
   const [annotations, setAnnotations] = useState<Omit<Annotation, "id">[]>([]);
-
-  // The slider input ref
-  const annotationRef = useRef<HTMLInputElement>(null);
+  //
+  const [selectedRating, setSelectedRating] = useState<Rating>(undefined);
 
   // TODO: refactor to a custom connection hook similar to host (probably the same hook with a generic callback)
   useEffect(() => {
@@ -88,9 +91,13 @@ const Annotator: NextPage = () => {
       .enter({ name: session.user.name })
       // TODO: remove this line
       .then(() => console.log("entered room"));
+  }, [room, roomCode, session, status]);
+
+  useEffect(() => {
+    if (!session || !room || !ablyChannel) return;
 
     // Step (3) "Wait" for an assignment
-    void ablyRoom.subscribe("assignment", (msg) => {
+    const handleAssignment = (msg: Ably.Types.Message) => {
       const result = annotatorAssignmentSchema.safeParse(msg.data);
       if (!result.success) {
         return console.error(result.error);
@@ -104,12 +111,18 @@ const Annotator: NextPage = () => {
         userId: session.user.id,
         ...result.data,
       });
-    });
+    };
+    void ablyChannel.subscribe("assignment", handleAssignment);
+  }, [ablyChannel, createSessionAssignment, room, session]);
+
+  useEffect(() => {
+    if (!ablyChannel) return;
 
     // Step (4) Wait for frames
-    void ablyRoom.subscribe("frame", (msg) => {
+    void ablyChannel.subscribe("frame", (msg) => {
       // If I haven't been assigned anything, then skip this frame
       if (sessionAssignment === undefined) {
+        console.log("no assignment");
         return;
       }
 
@@ -118,43 +131,52 @@ const Annotator: NextPage = () => {
         return console.error(result.error);
       }
 
-      setAnnotations((prev) => [
-        ...prev,
-        {
-          frameNumber: result.data.frameNumber,
-          sessionAssignmentId: sessionAssignment.id,
-          valence: convertValence(annotationRef.current?.value),
-          createdAt: new Date(),
-        },
-      ]);
+      setAnnotations((prev) => {
+        return [
+          ...prev,
+          {
+            frameNumber: result.data.frameNumber,
+            sessionAssignmentId: sessionAssignment.id,
+            valence: convertValence(selectedRating),
+            createdAt: new Date(),
+          },
+        ];
+      });
     });
 
+    return () => {
+      ablyChannel.unsubscribe("frame");
+    };
+  }, [ablyChannel, selectedRating, sessionAssignment]);
+
+  useEffect(() => {
+    if (!ablyChannel || annotations.length === 0) return;
+
     // Step (5) Write all the annotations
-    void ablyRoom.subscribe("writeAnnotations", () => {
+    const handleWriteAnnotations = () => {
       createManyAnnotations(annotations);
-    });
-  }, [
-    createManyAnnotations,
-    createSessionAssignment,
-    room,
-    roomCode,
-    router.events,
-    session,
-    status,
-  ]);
+    };
+    void ablyChannel.subscribe("writeAnnotations", handleWriteAnnotations);
+
+    return () => {
+      ablyChannel.unsubscribe("writeAnnotations");
+    };
+  }, [ablyChannel, annotations, createManyAnnotations]);
 
   useEffect(() => {
     if (!session) return;
 
     const cleanup = () => {
       void ablyChannel?.presence.leave({ name: session.user.name });
+      void ablyChannel?.unsubscribe();
+      void ablyChannel?.detach();
     };
     router.events.on("routeChangeStart", cleanup);
 
     return () => {
       router.events.off("routeChangeStart", cleanup);
     };
-  }, [ablyChannel?.presence, router.events, session]);
+  }, [ablyChannel, ablyChannel?.presence, router.events, session]);
 
   return (
     <main className="py-0 flex flex-col">
@@ -175,13 +197,14 @@ const Annotator: NextPage = () => {
           <div className="grid place-items-center">
             <Image
               className="place-items-center"
-              src={sessionAssignment?.url ?? "/profile.png"}
+              // src={sessionAssignment?.url ?? "/profile.png"}
+              src="/profile.png"
               alt="character"
               width={300}
               height={300}
             />
           </div>
-          <AnnotationInput sliderRef={annotationRef} />
+          <AnnotationInput selectedRating={selectedRating} setSelectedRating={setSelectedRating} />
         </div>
       </div>
     </main>

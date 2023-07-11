@@ -1,16 +1,22 @@
-import { useState } from "react";
+import type { Rating } from "@movies/pages/[roomCode]/annotator";
+import type { SetStateAction } from "react";
 
 import clsx from "clsx";
 
-type Rating = undefined | 1 | 2 | 3 | 4 | 5;
-
 interface AnnotationInputProps {
-  sliderRef: React.Ref<HTMLInputElement>;
+  selectedRating: Rating;
+  setSelectedRating: React.Dispatch<SetStateAction<Rating>>;
 }
+const convertInputToRating = (rawInput: number): Rating => {
+  const normalizedInput = Math.floor(rawInput / 20) + 1;
 
-const AnnotationInput = ({ sliderRef }: AnnotationInputProps) => {
-  const [selectedRating, setSelectedRating] = useState<Rating>(undefined);
+  if (normalizedInput < 1) return 1;
+  if (normalizedInput > 5) return 5;
 
+  return normalizedInput as Rating;
+};
+
+const AnnotationInput = ({ selectedRating, setSelectedRating }: AnnotationInputProps) => {
   return (
     <>
       <div className="relative flex h-32 items-center">
@@ -55,17 +61,15 @@ const AnnotationInput = ({ sliderRef }: AnnotationInputProps) => {
           5
         </div>
         <input
-          ref={sliderRef}
           type="range"
           className="absolute h-full w-full"
           onPointerUp={() => setSelectedRating(undefined)}
           onTouchEnd={() => setSelectedRating(undefined)}
+          onPointerDown={(e) => {
+            setSelectedRating(convertInputToRating(e.currentTarget.valueAsNumber));
+          }}
           onChange={(e) => {
-            const section = Math.floor(e.target.valueAsNumber / 20) + 1;
-
-            if (section < 1) setSelectedRating(1);
-            else if (section > 5) setSelectedRating(5);
-            else setSelectedRating(section as Rating);
+            setSelectedRating(convertInputToRating(e.target.valueAsNumber));
           }}
         />
       </div>

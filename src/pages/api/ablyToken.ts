@@ -4,7 +4,7 @@ import Ably from "ably";
 
 export default async function ablyTokenHandler(req: NextApiRequest, res: NextApiResponse) {
   const ably = new Ably.Realtime.Promise({
-    key: "xVLyHw.PS9S-g:BiHFwOujN24V-Ma7t8u9tAzjo9OWmY1Ke0psutRJRik",
+    key: "xVLyHw.Bf3Xjw:wE42Ye8h5gUIpUdGbOI7DMjz82x454IyP4UZ-102-vc",
   });
 
   try {
