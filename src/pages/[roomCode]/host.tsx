@@ -16,6 +16,15 @@ import { z } from "zod";
 
 import { api } from "@movies/utils/api";
 
+import { env } from "@movies/env.mjs";
+import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+
+type VideoPlayerProps = {
+  bucketName: string;
+  objectKey: string;
+};
+
 const ReactPlayer = dynamic(() => import("react-player"), {
   ssr: false,
 });
@@ -44,6 +53,49 @@ const HostPage: NextPage = () => {
   const [ablyChannel, setAblyChannel] = useState<Ably.Types.RealtimeChannelPromise>();
   // Video Player State
   const [isPlaying, setIsPlaying] = useState(false);
+
+  const [videoSource, setVideoSource] = useState<string | null>(null);
+
+  function VideoPlayer({ bucketName, objectKey }: VideoPlayerProps) {
+    useEffect(() => {
+      async function fetchVideo() {
+        const s3 = new S3Client({
+          region: env.NEXT_PUBLIC_AWS_REGION,
+          credentials: {
+            accessKeyId: env.NEXT_PUBLIC_AWS_ACCESS_KEY_ID,
+            secretAccessKey: env.NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY  
+          }
+        });
+  
+        const params = {
+          Bucket: bucketName,
+          Key: objectKey
+        };
+  
+        const command = new GetObjectCommand(params);
+        const url = await getSignedUrl(s3, command, { expiresIn: 900 });
+        setVideoSource(url);
+      }
+
+      void fetchVideo();
+    }, [bucketName, objectKey]);
+  
+    return (
+      <div>
+        {videoSource && (<div>
+                            <ReactPlayer 
+                              url={videoSource} 
+                              controls
+                              onProgress={(e) => {
+                                console.log(e);
+                              }}
+                              playbackRate={0.5}
+                              playing={isPlaying}
+                            />
+                          </div>) }
+      </div>
+    );  
+  }
 
   // Annotation Assignment Refs
   const characterRef = useRef<HTMLSelectElement>(null);
@@ -108,6 +160,9 @@ const HostPage: NextPage = () => {
         <span>Num Annotators: {annotators.size}</span>
       </div>
 
+      <div className="flex">
+        <div className="basis-5/6 grid place-items-center gap-4">
+          <VideoPlayer bucketName="movies-asaad-secure" objectKey="house.mp4" />,
       <div className="flex flex-wrap lg:flex-nowrap justify-center gap-4">
         <div className="basis-2/3 grid place-items-center gap-4">
           <ReactPlayer
