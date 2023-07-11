@@ -1,8 +1,10 @@
 import "@fortawesome/fontawesome-svg-core/styles.css";
 
+import type { Emotion } from "@prisma/client";
+
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useSession } from "next-auth/react";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import { faPersonWalkingArrowRight } from "@fortawesome/free-solid-svg-icons";
 import Ably from "ably/promises";
@@ -27,17 +29,29 @@ const ReactPlayer = dynamic(() => import("react-player"), {
   ssr: false,
 });
 
+const emotions: Emotion[] = ["ANGER", "DISGUST", "FEAR", "HAPPINESS", "SADNESS", "SURPRISE"];
+
 const annotatorJoinSchema = z.object({ name: z.string() });
 
 const HostPage: NextPage = () => {
+  // Grab the auto-generated room code from the URL
   const router = useRouter();
   const roomCode = router.query.roomCode as string;
 
-  const { data: room } = api.room.getRoomByCode.useQuery({ roomCode });
+  // The active room in the database
+  const { data: room } = api.room.getRoomByCode.useQuery(
+    { roomCode },
+    { refetchOnWindowFocus: false }
+  );
+
+  // Ensure this page is protected by authentication
   const { data: session, status } = useSession();
 
+  // Annotators (ids -> names) connected to this room
   const [annotators, setAnnotators] = useState<Map<string, string>>(new Map());
-  const [ablyClient, setAbly] = useState<Ably.Realtime>();
+  // The Ably channel that users connect to
+  const [ablyChannel, setAblyChannel] = useState<Ably.Types.RealtimeChannelPromise>();
+  // Video Player State
   const [isPlaying, setIsPlaying] = useState(false);
 
   const [videoSource, setVideoSource] = useState<string | null>(null);
@@ -83,21 +97,24 @@ const HostPage: NextPage = () => {
     );  
   }
 
+  // Annotation Assignment Refs
+  const characterRef = useRef<HTMLSelectElement>(null);
+  const emotionRef = useRef<HTMLSelectElement>(null);
 
+  // TODO: refactor to a custom connection hook that provides the channel and takes in a room, session, and callback
   useEffect(() => {
     if (status === "unauthenticated" || !session || !room) {
       // no user data, no database record for room
       return;
     }
+
     // Step (1) Setup the Ably Connection
     const ably = new Ably.Realtime({
       authUrl: "/api/ablyToken",
       clientId: session.user.id,
     });
-
-    setAbly(ably);
-
     const ablyRoom = ably.channels.get(roomCode);
+    setAblyChannel(ablyRoom);
 
     // Step (2) Handle client join
     void ablyRoom.presence.subscribe((e) => {
@@ -158,8 +175,32 @@ const HostPage: NextPage = () => {
             {[...annotators.entries()].map(([id, name]) => (
               <li key={id}>
                 <span>{name}</span>
-                <select></select>
-                <select></select>
+                {/* TODO: Update database schema, characters should have a name and a pfp */}
+                <select ref={characterRef}>
+                  {room?.movie.characters.map((character) => (
+                    <option key={character}>{character}</option>
+                  ))}
+                </select>
+                <select ref={emotionRef}>
+                  {emotions.map((emotion) => (
+                    <option className="capitalize" key={emotion}>
+                      {emotion}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  className="btn"
+                  onClick={() => {
+                    void ablyChannel?.publish("assignment", {
+                      for: id,
+                      character: characterRef.current?.value,
+                      imgUrl: "",
+                      emotion: emotionRef.current?.value,
+                    });
+                  }}
+                >
+                  Submit!
+                </button>
               </li>
             ))}
           </ul>
@@ -170,14 +211,3 @@ const HostPage: NextPage = () => {
 };
 
 export default HostPage;
-
-// TODO:
-// * Grab the selected movie from the database
-// * Load the movie from YouTube
-// * Setup connection to the annotators
-// * Show how many annotators are connected
-// * Add pause/play functionality
-// * Assign annotators to a character
-// * Manage playable blocks?
-// * Send frame to annotator
-// * Get Auth Working <----- next biggest hurdle
