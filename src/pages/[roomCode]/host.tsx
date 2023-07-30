@@ -13,6 +13,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { z } from "zod";
 
+import AssignmentSelector from "@movies/components/AssignmentSelector";
 import { VideoPlayer } from "@movies/components/VideoPlayer";
 import { api } from "@movies/utils/api";
 
@@ -26,7 +27,7 @@ const HostPage: NextPage = () => {
   const roomCode = router.query.roomCode as string;
 
   // The active room in the database
-  const { data: room } = api.room.getRoomByCode.useQuery(
+  const { data: room, isLoading } = api.room.getRoomByCode.useQuery(
     { roomCode },
     { refetchOnWindowFocus: false }
   );
@@ -90,6 +91,14 @@ const HostPage: NextPage = () => {
     return <p>Access Denied! Try logging in via the homepage!</p>;
   }
 
+  if (isLoading) {
+    return <p>Loading...</p>;
+  }
+
+  if (room === undefined) {
+    return <p>Room not found!</p>;
+  }
+
   return (
     <main className="py-0">
       <div className="flex justify-between py-4 text-lg">
@@ -108,20 +117,7 @@ const HostPage: NextPage = () => {
             objectKey="house.mp4"
             ablyChannel={ablyChannel}
           />
-          {/* <ReactPlayer
-            url={"https://www.youtube.com/watch?v=KMNhOUkpjaM"}
-            playbackRate={0.5}
-            onProgress={(e) => {
-              console.log(e);
-              void ablyChannel?.publish("frame", { frameNumber: e.playedSeconds });
-            }}
-            playing={isPlaying}
-            controls={false}
-          /> */}
           <div className="flex gap-4">
-            {/* <button className="btn btn-primary" onClick={() => setIsPlaying((val) => !val)}>
-              {isPlaying ? "Pause" : "Play"}
-            </button> */}
             <button
               className="btn btn-primary"
               onClick={() => void ablyChannel?.publish("writeAnnotations", {})}
@@ -134,9 +130,18 @@ const HostPage: NextPage = () => {
           <h2 className="text-center font-bold">Annotators</h2>
           <ul>
             {[...annotators.entries()].map(([id, name]) => (
+              <AssignmentSelector
+                key={id}
+                userId={id}
+                userName={name}
+                characters={room.movie.characters}
+                emotions={emotions}
+                ablyChannel={ablyChannel}
+              />
+            ))}
+            {/* {[...annotators.entries()].map(([id, name]) => (
               <li key={id} className="flex gap-2 items-center justify-center">
                 <span>{name}</span>
-                {/* TODO: Update database schema, characters should have a name and a pfp */}
                 <div className="flex flex-col">
                   <select ref={characterRef}>
                     {room?.movie?.characters.map((character) => (
@@ -165,7 +170,7 @@ const HostPage: NextPage = () => {
                   Assign
                 </button>
               </li>
-            ))}
+            ))} */}
           </ul>
         </div>
       </div>
