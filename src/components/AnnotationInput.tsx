@@ -1,12 +1,11 @@
 import type { Rating } from "@movies/pages/[roomCode]/annotator";
 import type { SetStateAction } from "react";
 
-import clsx from "clsx";
-
 interface AnnotationInputProps {
   selectedRating: Rating;
   setSelectedRating: React.Dispatch<SetStateAction<Rating>>;
 }
+
 const convertInputToRating = (rawInput: number): Rating => {
   const normalizedInput = Math.floor(rawInput / 20) + 1;
 
@@ -20,46 +19,6 @@ const AnnotationInput = ({ selectedRating, setSelectedRating }: AnnotationInputP
   return (
     <>
       <div className="relative flex h-32 items-center">
-        <div
-          className={clsx(
-            "grid h-full basis-full place-items-center bg-yellow-500",
-            selectedRating == 1 ? "ring ring-inset ring-red-500" : ""
-          )}
-        >
-          1
-        </div>
-        <div
-          className={clsx(
-            "grid h-full basis-full place-items-center bg-green-500",
-            selectedRating == 2 ? "ring ring-inset ring-red-500" : ""
-          )}
-        >
-          2
-        </div>
-        <div
-          className={clsx(
-            "grid h-full basis-full place-items-center bg-blue-500",
-            selectedRating == 3 ? "ring ring-inset ring-red-500" : ""
-          )}
-        >
-          3
-        </div>
-        <div
-          className={clsx(
-            "grid h-full basis-full place-items-center bg-indigo-500",
-            selectedRating == 4 ? "ring ring-inset ring-red-500" : ""
-          )}
-        >
-          4
-        </div>
-        <div
-          className={clsx(
-            "grid h-full basis-full place-items-center bg-violet-500",
-            selectedRating == 5 ? "ring ring-inset ring-red-500" : ""
-          )}
-        >
-          5
-        </div>
         <input
           type="range"
           className="absolute h-full w-full"
