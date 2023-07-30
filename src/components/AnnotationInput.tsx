@@ -22,9 +22,16 @@ const AnnotationInput = ({ selectedRating, setSelectedRating }: AnnotationInputP
         <input
           type="range"
           className="absolute h-full w-full"
-          onPointerUp={() => setSelectedRating(undefined)}
-          onTouchEnd={() => setSelectedRating(undefined)}
+          onPointerUp={(e) => {
+            e.currentTarget.classList.remove("active");
+            setSelectedRating(undefined);
+          }}
+          onTouchEnd={(e) => {
+            e.currentTarget.classList.remove("active");
+            setSelectedRating(undefined);
+          }}
           onPointerDown={(e) => {
+            e.currentTarget.classList.add("active");
             setSelectedRating(convertInputToRating(e.currentTarget.valueAsNumber));
           }}
           onChange={(e) => {

@@ -16,7 +16,7 @@ input[type="range"] {
   height: var(--slider-height);
 }
 
-input[type="range"]:active {
+input[type="range"].active {
   background: linear-gradient(to right, red, green);
 }
 
@@ -37,6 +37,6 @@ input[type="range"]::-webkit-slider-thumb {
   width: 5px;
 }
 
-input[type="range"]:active::-webkit-slider-thumb {
+input[type="range"].active::-webkit-slider-thumb {
   background-color: black;
 }
