@@ -23,7 +23,7 @@ const AssignmentSelector = ({
   return (
     <li className="flex gap-2 items-center justify-center">
       <span>{userName}</span>
-      <div className="flex flex-col">
+      <div className="flex">
         <select ref={characterRef}>
           {characters.map((character) => (
             <option key={character}>{character}</option>
