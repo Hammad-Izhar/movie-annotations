@@ -1,45 +1,50 @@
-import type { Rating } from "@movies/pages/[roomCode]/annotator";
 import type { SetStateAction } from "react";
 
+import clsx from "clsx";
+
 interface AnnotationInputProps {
-  selectedRating: Rating;
-  setSelectedRating: React.Dispatch<SetStateAction<Rating>>;
+  selectedRating: number | undefined;
+  setSelectedRating: React.Dispatch<SetStateAction<number | undefined>>;
 }
-
-const convertInputToRating = (rawInput: number): Rating => {
-  const normalizedInput = Math.floor(rawInput / 20) + 1;
-
-  if (normalizedInput < 1) return 1;
-  if (normalizedInput > 5) return 5;
-
-  return normalizedInput as Rating;
-};
 
 const AnnotationInput = ({ selectedRating, setSelectedRating }: AnnotationInputProps) => {
   return (
     <>
-      <div className="relative flex h-32 items-center">
-        <input
-          type="range"
-          className="absolute h-full w-full"
-          onPointerUp={(e) => {
-            e.currentTarget.classList.remove("active");
-            setSelectedRating(undefined);
-          }}
-          onTouchEnd={(e) => {
-            e.currentTarget.classList.remove("active");
-            setSelectedRating(undefined);
-          }}
-          onPointerDown={(e) => {
-            e.currentTarget.classList.add("active");
-            setSelectedRating(convertInputToRating(e.currentTarget.valueAsNumber));
-          }}
-          onChange={(e) => {
-            setSelectedRating(convertInputToRating(e.target.valueAsNumber));
-          }}
-        />
+      <div className="flex w-96 justify-center items-center gap-2">
+        <div className="flex flex-col justify-center items-center gap-4">
+          <div className="flex justify-between w-full">
+            <span>0</span>
+            <span>10</span>
+          </div>
+          <input
+            type="range"
+            min={0}
+            max={10}
+            step={0.1}
+            className="h-full w-full"
+            onPointerUp={(e) => {
+              e.currentTarget.classList.remove("active");
+              setSelectedRating(undefined);
+            }}
+            onTouchEnd={(e) => {
+              e.currentTarget.classList.remove("active");
+              setSelectedRating(undefined);
+            }}
+            onPointerDown={(e) => {
+              e.currentTarget.classList.add("active");
+              setSelectedRating(e.currentTarget.valueAsNumber);
+            }}
+            onChange={(e) => {
+              setSelectedRating(e.target.valueAsNumber);
+            }}
+          />
+          <span
+            className={clsx("p-4 w-80 text-center", selectedRating ? "bg-green-300" : "bg-red-300")}
+          >
+            {selectedRating ? `Annotation Recorded: ${selectedRating}` : "No Annotation Recorded"}
+          </span>
+        </div>
       </div>
-      <span>Selected Rating: {selectedRating ?? "No Rating"}</span>
     </>
   );
 };

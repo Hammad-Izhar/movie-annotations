@@ -23,9 +23,9 @@ model Annotation {
     id        String   @id @default(auto()) @map("_id") @db.ObjectId
     createdAt DateTime @default(now())
 
-    sessionAssignmentId String  @db.ObjectId
+    sessionAssignmentId String @db.ObjectId
     frameNumber         Int
-    valence             Valence
+    valence             Float?
 
     sessionAssignment SessionAssignment @relation(fields: [sessionAssignmentId], references: [id])
 }
@@ -117,13 +117,4 @@ enum Emotion {
     FEAR
     SURPRISE
     DISGUST
-}
-
-enum Valence {
-    UNDEFINED
-    ONE
-    TWO
-    THREE
-    FOUR
-    FIVE
 }

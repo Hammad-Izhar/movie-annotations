@@ -1,4 +1,3 @@
-import { Valence } from "@prisma/client";
 import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure } from "@movies/server/api/trpc";
@@ -10,7 +9,7 @@ export const annotationRouter = createTRPCRouter({
         z.object({
           frameNumber: z.number(),
           sessionAssignmentId: z.string(),
-          valence: z.nativeEnum(Valence),
+          valence: z.number().nullable(),
           createdAt: z.date().optional(),
         })
       )

@@ -8,7 +8,7 @@ main {
 
 /*Range Reset*/
 input[type="range"] {
-  --slider-height: 5rem;
+  --slider-height: 7rem;
   -webkit-appearance: none;
   appearance: none;
   background-color: grey;

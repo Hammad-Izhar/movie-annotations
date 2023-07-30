@@ -17,9 +17,6 @@ import { z } from "zod";
 
 import AnnotationInput from "@movies/components/AnnotationInput";
 import { api } from "@movies/utils/api";
-import convertValence from "@movies/utils/convertRatingToValence";
-
-export type Rating = undefined | 1 | 2 | 3 | 4 | 5;
 
 const annotatorAssignmentSchema = z.object({
   for: z.string().nonempty(),
@@ -69,7 +66,7 @@ const Annotator: NextPage = () => {
   // A buffer of Annotations waiting to be written
   const [annotations, setAnnotations] = useState<Omit<Annotation, "id">[]>([]);
   //
-  const [selectedRating, setSelectedRating] = useState<Rating>(undefined);
+  const [selectedRating, setSelectedRating] = useState<number | undefined>(undefined);
 
   // TODO: refactor to a custom connection hook similar to host (probably the same hook with a generic callback)
   useEffect(() => {
@@ -137,7 +134,7 @@ const Annotator: NextPage = () => {
           {
             frameNumber: result.data.frameNumber,
             sessionAssignmentId: sessionAssignment.id,
-            valence: convertValence(selectedRating),
+            valence: selectedRating ?? null,
             createdAt: new Date(),
           },
         ];
@@ -198,7 +195,11 @@ const Annotator: NextPage = () => {
             <Image
               className="place-items-center"
               // src={sessionAssignment?.url ?? "/profile.png"}
-              src={sessionAssignment?.character !== null && sessionAssignment?.character !== undefined ? "/" + sessionAssignment?.character + ".png" : "/profile.png"}
+              src={
+                sessionAssignment?.character !== null && sessionAssignment?.character !== undefined
+                  ? "/" + sessionAssignment?.character + ".png"
+                  : "/profile.png"
+              }
               alt="character"
               width={300}
               height={300}
